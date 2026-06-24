@@ -8,6 +8,7 @@ import rehypeSlug from "rehype-slug";
 import { Lightbox } from "./Lightbox";
 import { ZoomIn } from "lucide-react";
 import { CodeModal } from "./CodeModal";
+import Image from "next/image";
 
 type ImageInfo = {
   src: string;
@@ -37,8 +38,6 @@ export function ProjectImagesRenderer({
       prev !== null ? Math.min(images.length - 1, prev + 1) : null
     );
 
-  // Code block renderer – inline blocks just render as code,
-  // fenced blocks get an "Expand" button to open the modal.
   const CodeRenderer: React.FC<{
     className?: string;
     children?: React.ReactNode;
@@ -71,16 +70,21 @@ export function ProjectImagesRenderer({
     );
   };
 
+  // Inline image renderer (replaces <img> inside Markdown)
   const ImageRenderer = ({ src, alt }: { src?: string; alt?: string }) => {
     if (!src) return null;
     return (
-      <img
-        src={src}
-        alt={alt || ""}
-        className="cursor-zoom-in rounded-lg hover:opacity-90 transition"
-        onClick={() => openLightbox(src)}
-        style={{ maxWidth: "100%" }}
-      />
+      <span className="relative inline-block max-w-full">
+        <Image
+          src={src}
+          alt={alt || ""}
+          width={800}
+          height={450}
+          className="cursor-zoom-in rounded-lg hover:opacity-90 transition"
+          style={{ maxWidth: "100%", height: "auto" }}
+          onClick={() => openLightbox(src)}
+        />
+      </span>
     );
   };
 
@@ -110,22 +114,23 @@ export function ProjectImagesRenderer({
             {images.map((img, idx) => (
               <div
                 key={idx}
-                className="group relative rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-xl transition-all duration-300"
+                className="group relative rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-xl transition-all duration-300 h-64"
+                onClick={() => {
+                  const foundIdx = images.findIndex((i) => i.src === img.src);
+                  if (foundIdx !== -1) setLightboxIndex(foundIdx);
+                }}
               >
-                <img
+                <Image
                   src={img.src}
                   alt={img.alt}
-                  className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
-                  onClick={() => {
-                    const foundIdx = images.findIndex((i) => i.src === img.src);
-                    if (foundIdx !== -1) setLightboxIndex(foundIdx);
-                  }}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                   <ZoomIn className="w-10 h-10 text-white" />
                 </div>
                 {img.alt && (
-                  <div className="p-3 text-sm text-gray-600 dark:text-gray-400">
+                  <div className="absolute bottom-0 left-0 right-0 p-3 text-sm text-white bg-gradient-to-t from-black/60 to-transparent">
                     {img.alt}
                   </div>
                 )}
