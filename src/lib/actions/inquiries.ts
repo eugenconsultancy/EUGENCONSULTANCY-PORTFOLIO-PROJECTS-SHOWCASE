@@ -36,7 +36,7 @@ export async function submitContactForm(formData: FormData) {
   });
   if (!parsed.success) throw new Error(parsed.error.message);
 
-  const inquiry = await db.inquiry.create({
+  await db.inquiry.create({
     data: {
       name: parsed.data.name,
       email: parsed.data.email,
@@ -45,7 +45,6 @@ export async function submitContactForm(formData: FormData) {
     },
   });
 
-  // Send email notification (fire-and-forget – won't block the user)
   sendNewInquiryEmail(parsed.data).catch(console.error);
 
   revalidatePath("/contact");

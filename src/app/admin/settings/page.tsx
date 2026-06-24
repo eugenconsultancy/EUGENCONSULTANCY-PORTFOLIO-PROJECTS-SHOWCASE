@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { ProfileSettingsForm } from "@/components/ProfileSettingsForm";
+import Image from "next/image";
 
 export default async function SettingsPage() {
   const session = await getServerSession(authOptions);
@@ -12,7 +13,6 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-10">
-      {/* Header */}
       <div className="relative">
         <div
           aria-hidden
@@ -29,12 +29,11 @@ export default async function SettingsPage() {
         </div>
       </div>
 
-      {/* Profile header card (if profile exists) */}
       {profile && (
         <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 p-6 shadow-sm flex items-center gap-6">
-          <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
+          <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-lg flex-shrink-0 relative">
             {profile.picture ? (
-              <img src={profile.picture} alt={profile.name} className="w-full h-full object-cover" />
+              <Image src={profile.picture} alt={profile.name} fill className="object-cover" />
             ) : (
               <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-2xl font-bold text-gray-500">
                 {profile.name?.charAt(0)?.toUpperCase()}
@@ -49,7 +48,6 @@ export default async function SettingsPage() {
         </div>
       )}
 
-      {/* Settings Form */}
       <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
         <ProfileSettingsForm profile={profile} />
       </div>

@@ -61,8 +61,12 @@ export function ImageUploader({
       await deleteProjectImage(imageId);
       setImages((prev) => prev.filter((img) => img.id !== imageId));
       toast.success("Image deleted");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete image");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to delete image");
+      }
     }
   };
 
@@ -81,16 +85,14 @@ export function ImageUploader({
               fill
               className="object-cover"
             />
-            {/* Insert button (existing) */}
             <button
               type="button"
               onClick={() => onInsertShortcode(`[img:${img.id}]`)}
-              className="absolute inset-0 bg-black bg-opacity-50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute inset-0 bg-black bg-opacity-50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
             >
               Insert
             </button>
 
-            {/* Delete button (top-right) */}
             <button
               type="button"
               onClick={(e) => {

@@ -10,7 +10,6 @@ import { ReactionButtons } from "@/components/ReactionButtons";
 import { ShareButton } from "@/components/ShareButton";
 import { ViewCounter } from "@/components/ViewCounter";
 import { readingTime, projectJsonLd } from "@/lib/seo";
-import { ProjectLinks } from "@/components/ProjectLinks";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import type { Metadata } from "next";
 
@@ -31,7 +30,7 @@ type ProjectWithImages = {
   approach: string | null;
   result: string | null;
   metrics: string | null;
-  frameworkRationale?: string | null;   // optional
+  frameworkRationale?: string | null;
   beforeImageId: number | null;
   afterImageId: number | null;
   beforeImage: { filename: string } | null;
@@ -151,9 +150,9 @@ export default async function ProjectDetailPage({
             <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">{project.summary}</p>
             <div className="flex flex-wrap items-center gap-6 mt-6 text-sm">
               <ViewCounter slug={project.slug} initialCount={project.viewCount} />
-              <span className="text-gray-500 dark:text-gray-400">·</span>
+              <span className="text-gray-500 dark:text-gray-400">&middot;</span>
               <span className="text-gray-500 dark:text-gray-400">{readTime} min read</span>
-              <span className="text-gray-500 dark:text-gray-400">·</span>
+              <span className="text-gray-500 dark:text-gray-400">&middot;</span>
               <ReactionButtons projectId={project.id} />
               <div className="ml-auto"><ShareButton title={project.title} slug={project.slug} /></div>
             </div>

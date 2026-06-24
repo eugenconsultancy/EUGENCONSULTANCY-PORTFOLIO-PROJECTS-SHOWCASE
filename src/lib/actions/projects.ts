@@ -14,7 +14,6 @@ import path from "path";
 export async function createDraftProject() {
   const session = await getServerSession(authOptions);
   if (!session) throw new Error("Unauthorized");
-
   const token = uuidv4();
   const defaultSlug = `draft-${Date.now()}`;
   const project = await db.project.create({
@@ -28,7 +27,6 @@ export async function createDraftProject() {
       previewToken: token,
     },
   });
-
   revalidatePath("/admin/projects");
   redirect(`/admin/projects/${project.slug}`);
 }
@@ -36,7 +34,6 @@ export async function createDraftProject() {
 export async function updateProject(slug: string, formData: FormData) {
   const session = await getServerSession(authOptions);
   if (!session) throw new Error("Unauthorized");
-
   const raw = Object.fromEntries(formData.entries());
   const parsed = projectSchema.safeParse({
     title: raw.title,
@@ -57,16 +54,8 @@ export async function updateProject(slug: string, formData: FormData) {
     afterImageId: raw.afterImageId ? parseInt(raw.afterImageId as string) : undefined,
     frameworkRationale: raw.frameworkRationale,
   });
-
-  if (!parsed.success) {
-    throw new Error(parsed.error.message);
-  }
-
-  await db.project.update({
-    where: { slug },
-    data: parsed.data,
-  });
-
+  if (!parsed.success) throw new Error(parsed.error.message);
+  await db.project.update({ where: { slug }, data: parsed.data });
   revalidatePath(`/projects/${slug}`);
   revalidatePath("/admin/projects");
   redirect("/admin/projects");
@@ -75,7 +64,6 @@ export async function updateProject(slug: string, formData: FormData) {
 export async function deleteProject(slug: string) {
   const session = await getServerSession(authOptions);
   if (!session) throw new Error("Unauthorized");
-
   await db.project.delete({ where: { slug } });
   revalidatePath("/admin/projects");
   redirect("/admin/projects");
@@ -113,16 +101,12 @@ export async function getProjectDetail(slug: string) {
 
 export async function incrementProjectView(slug: string) {
   if (!slug) return;
-  await db.project.updateMany({
-    where: { slug },
-    data: { viewCount: { increment: 1 } },
-  });
+  await db.project.updateMany({ where: { slug }, data: { viewCount: { increment: 1 } } });
 }
 
 export async function generatePreviewToken(slug: string) {
   const session = await getServerSession(authOptions);
   if (!session) throw new Error("Unauthorized");
-
   const token = uuidv4();
   await db.project.update({ where: { slug }, data: { previewToken: token } });
   revalidatePath("/admin/projects");
@@ -132,11 +116,7 @@ export async function generatePreviewToken(slug: string) {
 export async function getProjectByPreview(slug: string, token: string) {
   const project = await db.project.findUnique({
     where: { slug },
-    include: {
-      images: true,
-      beforeImage: { select: { filename: true } },
-      afterImage: { select: { filename: true } },
-    },
+    include: { images: true, beforeImage: { select: { filename: true } }, afterImage: { select: { filename: true } } },
   });
   if (!project) return null;
   if (project.status === "PUBLISHED") return project;
@@ -151,7 +131,6 @@ export async function recordProjectClick(projectId: number, linkType: string) {
 export async function updateProjectsOrder(slugs: string[]) {
   const session = await getServerSession(authOptions);
   if (!session) throw new Error("Unauthorized");
-
   for (let i = 0; i < slugs.length; i++) {
     await db.project.update({ where: { slug: slugs[i] }, data: { displayOrder: i } });
   }
@@ -162,15 +141,10 @@ export async function updateProjectsOrder(slugs: string[]) {
 export async function deleteProjectImage(imageId: number) {
   const session = await getServerSession(authOptions);
   if (!session) throw new Error("Unauthorized");
-
   const image = await db.projectImage.findUnique({ where: { id: imageId } });
   if (!image) throw new Error("Image not found");
-
   const filePath = path.join(process.cwd(), "public", "uploads", "projects", image.filename);
-  try {
-    await unlink(filePath);
-  } catch (err) {}
-
+  try { await unlink(filePath); } catch { /* file may not exist */ }
   await db.projectImage.delete({ where: { id: imageId } });
   revalidatePath("/admin/projects/[slug]");
   return { success: true };

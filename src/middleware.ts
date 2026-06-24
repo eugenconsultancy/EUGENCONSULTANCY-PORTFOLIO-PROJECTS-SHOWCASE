@@ -1,25 +1,24 @@
 import { withAuth } from "next-auth/middleware";
 
 export default withAuth(
-    function middleware(req) {
-        // No additional logic needed
+  function middleware() {
+    // no extra logic needed
+  },
+  {
+    callbacks: {
+      authorized: ({ token, req }) => {
+        if (req.nextUrl.pathname === "/admin/login") {
+          return true;
+        }
+        return !!token;
+      },
     },
-    {
-        callbacks: {
-            authorized: ({ token, req }) => {
-                // Allow unauthenticated access to the login page
-                if (req.nextUrl.pathname === "/admin/login") {
-                    return true;
-                }
-                return !!token;
-            },
-        },
-        pages: {
-            signIn: "/admin/login",
-        },
-    }
+    pages: {
+      signIn: "/admin/login",
+    },
+  }
 );
 
 export const config = {
-    matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*"],
 };

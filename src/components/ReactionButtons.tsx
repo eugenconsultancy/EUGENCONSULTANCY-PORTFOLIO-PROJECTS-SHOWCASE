@@ -1,21 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 const EMOJIS = ["👍", "🔥", "✨", "🚀", "💡"];
 
 export function ReactionButtons({ projectId }: { projectId: number }) {
   const [counts, setCounts] = useState<Record<string, number>>({});
 
-  const fetchCounts = async () => {
+  const fetchCounts = useCallback(async () => {
     const res = await fetch(`/api/projects/${projectId}/reactions`);
     const data = await res.json();
     setCounts(data.counts || {});
-  };
+  }, [projectId]);
 
   useEffect(() => {
     fetchCounts();
-  }, [projectId]);
+  }, [fetchCounts]);
 
   const addReaction = async (emoji: string) => {
     await fetch(`/api/projects/${projectId}/reactions`, {

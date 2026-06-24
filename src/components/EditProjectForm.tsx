@@ -24,7 +24,7 @@ type ProjectWithImages = {
   approach: string | null;
   result: string | null;
   metrics: string | null;
-  frameworkRationale: string | null;
+  frameworkRationale?: string | null;   // optional
   beforeImageId: number | null;
   afterImageId: number | null;
   images: { id: number; filename: string; alt: string | null }[];
@@ -77,7 +77,6 @@ export function EditProjectForm({ project }: { project: ProjectWithImages }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
-      {/* Basic fields (same as before) */}
       <div>
         <label className="block text-sm font-medium mb-1">Title</label>
         <input type="text" name="title" defaultValue={project.title} className="w-full border p-2 rounded" required />
@@ -130,7 +129,6 @@ export function EditProjectForm({ project }: { project: ProjectWithImages }) {
         />
       </div>
 
-      {/* Markdown editor and image uploader */}
       <MarkdownEditorWithPreview value={body} onChange={setBody} />
       <input type="hidden" name="body" value={body} />
       <ImageUploader
@@ -139,7 +137,7 @@ export function EditProjectForm({ project }: { project: ProjectWithImages }) {
         onInsertShortcode={handleInsertShortcode}
       />
 
-      {/* Case study fields (optional) */}
+      {/* Case Study */}
       <div className="border-t pt-6 mt-6">
         <h3 className="text-lg font-semibold mb-4">Case Study (optional)</h3>
         <div>

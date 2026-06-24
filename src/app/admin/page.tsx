@@ -13,7 +13,6 @@ export default async function AdminDashboard() {
   const unreadInquiries = await db.inquiry.count({ where: { isRead: false } });
   const totalViews = (await db.project.aggregate({ _sum: { viewCount: true } }))._sum.viewCount || 0;
 
-  // Monthly comments
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
   const comments: CommentRecord[] = await db.comment.findMany({
@@ -35,7 +34,6 @@ export default async function AdminDashboard() {
     monthlyComments.push({ month: key, count: monthlyMap.get(key) || 0 });
   }
 
-  // Recent activity
   const recentInquiries = await db.inquiry.findMany({
     orderBy: { createdAt: "desc" },
     take: 3,
@@ -51,10 +49,10 @@ export default async function AdminDashboard() {
       title: `New inquiry from ${inq.name}`,
       time: inq.createdAt,
     })),
-    ...recentComments.map((com) => ({
+    ...recentComments.map(() => ({
       type: "comment" as const,
       title: `New comment awaiting approval`,
-      time: com.createdAt,
+      time: new Date(),
     })),
   ]
     .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
@@ -62,7 +60,6 @@ export default async function AdminDashboard() {
 
   return (
     <div className="space-y-10">
-      {/* Hero Header */}
       <div className="relative">
         <div
           aria-hidden
@@ -80,12 +77,11 @@ export default async function AdminDashboard() {
             Welcome back, Admin
           </h1>
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            Here's a quick overview of your portfolio today.
+            Here&apos;s a quick overview of your portfolio today.
           </p>
         </div>
       </div>
 
-      {/* KPI Cards with icons and trends */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm p-5">
           <div className="flex items-center gap-3">
@@ -140,10 +136,8 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
-      {/* Recent Activity + Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          {/* Recent Activity */}
           <div className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Activity</h2>
             <div className="space-y-4">
@@ -152,9 +146,7 @@ export default async function AdminDashboard() {
               )}
               {recentActivity.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-3">
-                  <div className={`mt-1 w-2 h-2 rounded-full ${
-                    item.type === "inquiry" ? "bg-blue-500" : "bg-amber-500"
-                  }`} />
+                  <div className={`mt-1 w-2 h-2 rounded-full ${item.type === "inquiry" ? "bg-blue-500" : "bg-amber-500"}`} />
                   <div>
                     <p className="text-sm text-gray-700 dark:text-gray-300">{item.title}</p>
                     <p className="text-xs text-gray-400">{new Date(item.time).toLocaleString()}</p>
@@ -163,14 +155,11 @@ export default async function AdminDashboard() {
               ))}
             </div>
           </div>
-
-          {/* Chart */}
           <div className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
             <AdminCharts monthlyComments={monthlyComments} />
           </div>
         </div>
 
-        {/* Quick Actions */}
         <div className="space-y-4">
           <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>

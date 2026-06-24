@@ -37,14 +37,13 @@ export function ProjectImagesRenderer({
       prev !== null ? Math.min(images.length - 1, prev + 1) : null
     );
 
-  // Custom code renderer – makes code blocks clickable
-  const CodeRenderer = ({
-    node,
-    inline,
-    className,
-    children,
-    ...props
-  }: any) => {
+  // Code block renderer – inline blocks just render as code,
+  // fenced blocks get an "Expand" button to open the modal.
+  const CodeRenderer: React.FC<{
+    className?: string;
+    children?: React.ReactNode;
+    inline?: boolean;
+  }> = ({ className, children, inline, ...props }) => {
     const match = /language-(\w+)/.exec(className || "");
     const language = match ? match[1] : undefined;
     const codeString = String(children).replace(/\n$/, "");
@@ -72,7 +71,6 @@ export function ProjectImagesRenderer({
     );
   };
 
-  // Custom image renderer (for gallery)
   const ImageRenderer = ({ src, alt }: { src?: string; alt?: string }) => {
     if (!src) return null;
     return (
@@ -103,7 +101,6 @@ export function ProjectImagesRenderer({
         </ReactMarkdown>
       </div>
 
-      {/* Image gallery (if multiple images) */}
       {showGallery && (
         <div className="mt-10">
           <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
@@ -138,7 +135,6 @@ export function ProjectImagesRenderer({
         </div>
       )}
 
-      {/* Lightbox */}
       {lightboxIndex !== null && (
         <Lightbox
           images={images}
@@ -149,7 +145,6 @@ export function ProjectImagesRenderer({
         />
       )}
 
-      {/* Code modal */}
       {codeModal && (
         <CodeModal
           code={codeModal.code}

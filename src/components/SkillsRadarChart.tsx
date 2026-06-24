@@ -29,9 +29,8 @@ export function SkillsRadarChart({ json }: { json: string }) {
     return <p className="text-red-500">Invalid radar data.</p>;
   }
 
-  // Transform to Recharts format
   const chartData = data.labels.map((label, index) => {
-    const obj: Record<string, any> = { label };
+    const obj: Record<string, string | number> = { label };
     data.datasets.forEach((ds) => {
       obj[ds.label] = ds.data[index] || 0;
     });
@@ -58,7 +57,6 @@ export function SkillsRadarChart({ json }: { json: string }) {
         </RadarChart>
       </ResponsiveContainer>
 
-      {/* Legend with scores */}
       <div className="mt-6 flex flex-wrap justify-center gap-4">
         {data.labels.map((label, index) => {
           const value = data.datasets[0]?.data[index];

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { markInquiryRead, deleteInquiry } from "@/lib/actions/inquiries";
 import toast from "react-hot-toast";
-import { Mail, MailOpen, Trash2, X, Search } from "lucide-react";
+import { X, Search, Trash2 } from "lucide-react";
 
 type Inquiry = {
   id: number;
@@ -60,7 +60,6 @@ export function InquiryInbox({ inquiries }: { inquiries: Inquiry[] }) {
 
   return (
     <div className="flex gap-6">
-      {/* Sidebar */}
       <div className="w-60 flex-shrink-0 hidden md:block">
         <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 space-y-2">
           <button
@@ -82,9 +81,7 @@ export function InquiryInbox({ inquiries }: { inquiries: Inquiry[] }) {
         </div>
       </div>
 
-      {/* Main list */}
       <div className="flex-1">
-        {/* Search */}
         <div className="relative mb-4">
           <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
           <input
@@ -96,7 +93,6 @@ export function InquiryInbox({ inquiries }: { inquiries: Inquiry[] }) {
           />
         </div>
 
-        {/* List */}
         <div className="space-y-3">
           {filtered.map((inq) => (
             <motion.div
@@ -142,7 +138,6 @@ export function InquiryInbox({ inquiries }: { inquiries: Inquiry[] }) {
         </div>
       </div>
 
-      {/* Detail drawer */}
       <AnimatePresence>
         {selectedInquiry && (
           <motion.div

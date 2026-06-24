@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-// GET reaction counts for a project
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -24,7 +23,6 @@ export async function GET(
   return NextResponse.json({ counts });
 }
 
-// POST a new reaction (IP‑based, one vote per emoji)
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -48,8 +46,8 @@ export async function POST(
     await db.reaction.create({
       data: { projectId, ip, emoji },
     });
-  } catch (err: any) {
-    // If duplicate, ignore – return current counts instead
+  } catch {
+    // duplicate – ignore
   }
 
   const reactions = await db.reaction.groupBy({
