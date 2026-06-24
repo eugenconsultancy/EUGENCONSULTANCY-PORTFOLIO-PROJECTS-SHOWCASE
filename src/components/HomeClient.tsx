@@ -385,7 +385,7 @@ export function HomeClient({ profile, featuredProjects, experiences, certificati
       {showHireBanner && (
         <div className="fixed top-16 left-0 right-0 z-40 bg-gradient-to-r from-blue-600 to-violet-600 text-white text-center py-2.5 px-4 text-sm font-medium shadow-lg">
           🚀 Open to new opportunities —{" "}
-          <Link href="/contact" className="underline underline-offset-2 hover:text-blue-100">letlet's talkapos;s talk</Link>
+          <Link href="/contact" className="underline underline-offset-2 hover:text-blue-100">letlet&apos;s talkapos;s talk</Link>
         </div>
       )}
 
