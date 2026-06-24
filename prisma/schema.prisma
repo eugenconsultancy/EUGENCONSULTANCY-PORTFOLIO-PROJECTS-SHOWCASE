@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id             Int             @id @default(autoincrement())
+  name           String
+  bio            String
+  picture        String?
+  status         String?
+  skills         String?
+  certifications String?
+  availability   String?
+  website        String?
+  github         String?
+  linkedin       String?
+  twitter        String?
+  radarJson      String?
+  experiences    Experience[]
+  certs          Certification[]
+}
+
+model Experience {
+  id          Int      @id @default(autoincrement())
+  profileId   Int
+  profile     Profile  @relation(fields: [profileId], references: [id])
+  title       String
+  company     String
+  startDate   String
+  endDate     String?
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+model Certification {
+  id              Int      @id @default(autoincrement())
+  profileId       Int
+  profile         Profile  @relation(fields: [profileId], references: [id])
+  title           String
+  issuer          String
+  date            String
+  verificationUrl String?
+  logo            String?
+  createdAt       DateTime @default(now())
+}
+
+model Project {
+  id                 Int            @id @default(autoincrement())
+  title              String
+  slug               String         @unique
+  summary            String
+  body               String
+  techStack          String
+  dependencies       String?
+  liveUrl            String?
+  githubUrl          String?
+  status             String         @default("DRAFT")
+  displayOrder       Int            @default(0)
+  viewCount          Int            @default(0)
+  previewToken       String?        @unique
+  frameworkRationale String?        // New field
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  problem            String?
+  approach           String?
+  result             String?
+  metrics            String?
+  beforeImageId      Int?           @unique
+  afterImageId       Int?           @unique
+  beforeImage        ProjectImage?  @relation("BeforeImage", fields: [beforeImageId], references: [id])
+  afterImage         ProjectImage?  @relation("AfterImage", fields: [afterImageId], references: [id])
+  images             ProjectImage[] @relation("ProjectImages")
+  comments           Comment[]
+  reactions          Reaction[]
+  clicks             ProjectClick[]
+}
+
+model ProjectImage {
+  id        Int      @id @default(autoincrement())
+  projectId Int?
+  project   Project? @relation("ProjectImages", fields: [projectId], references: [id], onDelete: Cascade)
+  filename  String
+  alt       String?
+  isMain    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  beforeFor Project? @relation("BeforeImage")
+  afterFor  Project? @relation("AfterImage")
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  projectId Int
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parentId  Int?
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+  name      String
+  content   String
+  status    String    @default("PENDING")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Reaction {
+  id        Int      @id @default(autoincrement())
+  projectId Int
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  ip        String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, ip, emoji])
+}
+
+model ProjectClick {
+  id        Int      @id @default(autoincrement())
+  projectId Int
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  linkType  String
+  createdAt DateTime @default(now())
+}
+
+model Inquiry {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  subject   String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Admin {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+}

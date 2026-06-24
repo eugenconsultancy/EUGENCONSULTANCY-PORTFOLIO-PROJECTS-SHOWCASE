@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* highlight.js theme (GitHub) */
+@import "highlight.js/styles/github.css";
+
+
+/* Minimal dark mode overrides for links and smooth transitions */
+a {
+  @apply dark:text-blue-400 transition-colors;
+}
+
+/* Smooth background transition */
+body {
+  @apply transition-colors;
+}

@@ -2,26 +2,199 @@
 @tailwind components;
 @tailwind utilities;
 
+/* highlight.js theme */
+@import "highlight.js/styles/github-dark.css";
+
+/* ─── Design Tokens ─────────────────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:            #ffffff;
+  --bg-subtle:     #f8fafc;
+  --bg-muted:      #f1f5f9;
+  --surface:       #ffffff;
+  --surface-raised:#f8fafc;
+  --border:        #e2e8f0;
+  --border-subtle: #f1f5f9;
+
+  --text-primary:  #0f172a;
+  --text-secondary:#475569;
+  --text-muted:    #94a3b8;
+
+  --accent:        #6366f1;
+  --accent-hover:  #4f46e5;
+  --accent-subtle: #eef2ff;
+  --accent-glow:   rgba(99, 102, 241, 0.15);
+
+  --success:       #10b981;
+  --success-subtle:#ecfdf5;
+
+  --radius-sm:     6px;
+  --radius:        10px;
+  --radius-lg:     16px;
+  --radius-xl:     24px;
+  --radius-full:   9999px;
+
+  --shadow-sm:     0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+  --shadow:        0 4px 6px -1px rgba(15,23,42,0.08), 0 2px 4px -2px rgba(15,23,42,0.04);
+  --shadow-md:     0 10px 15px -3px rgba(15,23,42,0.08), 0 4px 6px -4px rgba(15,23,42,0.04);
+  --shadow-lg:     0 20px 25px -5px rgba(15,23,42,0.10), 0 8px 10px -6px rgba(15,23,42,0.04);
+  --shadow-glow:   0 0 0 3px var(--accent-glow);
+
+  --toast-bg:      #0f172a;
+  --toast-color:   #f8fafc;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --bg:            #0a0f1e;
+  --bg-subtle:     #0f172a;
+  --bg-muted:      #1e293b;
+  --surface:       #0f172a;
+  --surface-raised:#1e293b;
+  --border:        #1e293b;
+  --border-subtle: #0f172a;
+
+  --text-primary:  #f1f5f9;
+  --text-secondary:#94a3b8;
+  --text-muted:    #475569;
+
+  --accent:        #818cf8;
+  --accent-hover:  #6366f1;
+  --accent-subtle: rgba(99,102,241,0.12);
+  --accent-glow:   rgba(129,140,248,0.2);
+
+  --success:       #34d399;
+  --success-subtle:#064e3b;
+
+  --shadow-sm:     0 1px 3px rgba(0,0,0,0.3);
+  --shadow:        0 4px 6px -1px rgba(0,0,0,0.4);
+  --shadow-md:     0 10px 15px -3px rgba(0,0,0,0.4);
+  --shadow-lg:     0 20px 25px -5px rgba(0,0,0,0.5);
+
+  --toast-bg:      #1e293b;
+  --toast-color:   #f1f5f9;
+}
+
+/* ─── Base ───────────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  line-height: 1.6;
 }
 
+/* ─── Typography ─────────────────────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.025em;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* ─── Links ──────────────────────────────────────────────────────────────────── */
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+a:hover { color: var(--accent-hover); }
+
+/* ─── Focus ──────────────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ─── Selection ──────────────────────────────────────────────────────────────── */
+::selection {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+/* ─── Utilities ──────────────────────────────────────────────────────────────── */
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .text-balance { text-wrap: balance; }
+
+  .glass {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.5);
+  }
+  .dark .glass {
+    background: rgba(15,23,42,0.7);
+    border-color: rgba(255,255,255,0.06);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .card-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .animate-fade-up {
+    animation: fadeUp 0.5s ease both;
+  }
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  50%       { box-shadow: 0 0 0 8px transparent; }
+}
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ─── Highlight.js overrides for light mode ──────────────────────────────────── */
+:not(.dark) .hljs {
+  background: var(--bg-muted);
+  border-radius: var(--radius);
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }
