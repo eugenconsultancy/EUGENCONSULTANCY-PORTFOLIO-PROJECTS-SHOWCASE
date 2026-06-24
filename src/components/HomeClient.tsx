@@ -239,28 +239,39 @@ function StatCounter({ end, label, suffix, trigger }: { end: number; label: stri
 // ─── Tech orbit ───────────────────────────────────────────────
 function TechOrbit({ items }: { items: string[] }) {
   return (
-    <div className="relative flex items-center justify-center h-80 select-none">
-      <div className="absolute z-10 w-20 h-20 rounded-full bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center shadow-xl shadow-blue-500/30">
-        <span className="text-white text-xs font-bold text-center leading-tight">EUGEN<br />STACK</span>
-      </div>
-      {[{ r: 90, speed: 22, slice: items.slice(0, 4) }, { r: 148, speed: 36, slice: items.slice(4, 9) }, { r: 200, speed: 50, slice: items.slice(9) }].map((ring, ri) => (
-        <div key={ri} className="absolute rounded-full border border-dashed border-gray-200 dark:border-gray-700" style={{ width: ring.r * 2, height: ring.r * 2 }}>
-          {ring.slice.map((tech, ti) => {
-            const angle = (360 / ring.slice.length) * ti;
-            const rad = (angle * Math.PI) / 180;
-            const x = ring.r * Math.cos(rad - Math.PI / 2);
-            const y = ring.r * Math.sin(rad - Math.PI / 2);
-            return (
-              <div key={tech} className="absolute" style={{ left: "50%", top: "50%", transform: `translate(calc(${x}px - 50%), calc(${y}px - 50%))` }}>
-                <div className="px-2.5 py-1 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-700 dark:text-gray-300 shadow-sm whitespace-nowrap">
-                  {tech}
-                </div>
-              </div>
-            );
-          })}
+    <>
+      {/* Desktop orbit */}
+      <div className="hidden md:flex relative items-center justify-center h-80 select-none">
+        <div className="absolute z-10 w-20 h-20 rounded-full bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center shadow-xl shadow-blue-500/30">
+          <span className="text-white text-xs font-bold text-center leading-tight">EUGEN<br />STACK</span>
         </div>
-      ))}
-    </div>
+        {[{ r: 90, speed: 22, slice: items.slice(0, 4) }, { r: 148, speed: 36, slice: items.slice(4, 9) }, { r: 200, speed: 50, slice: items.slice(9) }].map((ring, ri) => (
+          <div key={ri} className="absolute rounded-full border border-dashed border-gray-200 dark:border-gray-700" style={{ width: ring.r * 2, height: ring.r * 2 }}>
+            {ring.slice.map((tech, ti) => {
+              const angle = (360 / ring.slice.length) * ti;
+              const rad = (angle * Math.PI) / 180;
+              const x = ring.r * Math.cos(rad - Math.PI / 2);
+              const y = ring.r * Math.sin(rad - Math.PI / 2);
+              return (
+                <div key={tech} className="absolute" style={{ left: "50%", top: "50%", transform: `translate(calc(${x}px - 50%), calc(${y}px - 50%))` }}>
+                  <div className="px-2.5 py-1 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-700 dark:text-gray-300 shadow-sm whitespace-nowrap">
+                    {tech}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+      {/* Mobile grid */}
+      <div className="flex md:hidden flex-wrap justify-center gap-2">
+        {items.map((tech) => (
+          <span key={tech} className="px-3 py-1.5 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-700 dark:text-gray-300 shadow-sm">
+            {tech}
+          </span>
+        ))}
+      </div>
+    </>
   );
 }
 
@@ -289,25 +300,34 @@ function TestimonialCarousel({ items }: { items: typeof TESTIMONIALS }) {
   );
 }
 
-// ─── Deployment step modal ────────────────────────────────────
+// ─── Deployment journey (fixed responsiveness) ─────────────────
 function DeploymentJourney() {
   const [active, setActive] = useState<number | null>(null);
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-0 sm:gap-0">
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-3">
         {DEPLOYMENT_STEPS.map((step, i) => (
           <React.Fragment key={step.name}>
-            <button onClick={() => setActive(active === i ? null : i)}
-              className={`group flex flex-col items-center text-center p-4 rounded-xl transition-all duration-200 w-full sm:w-auto min-w-[100px] ${active === i ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-105" : "bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:border-blue-300 hover:shadow-md"}`}>
-              <span className="text-2xl mb-1">{step.icon}</span>
-              <span className="text-xs font-bold">{step.name}</span>
+            <button
+              onClick={() => setActive(active === i ? null : i)}
+              className={`group flex flex-col items-center text-center p-3 rounded-xl transition-all duration-200 min-w-[100px] ${active === i
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-105"
+                  : "bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:border-blue-300 hover:shadow-md"
+                }`}
+            >
+              <span className="text-lg mb-1">{step.icon}</span>
+              <span className="text-xs font-bold leading-tight">{step.name}</span>
             </button>
-            {i < DEPLOYMENT_STEPS.length - 1 && <div className="hidden sm:flex items-center text-gray-300 dark:text-gray-700 text-lg font-bold px-1">──►</div>}
+            {i < DEPLOYMENT_STEPS.length - 1 && (
+              <div className="hidden sm:flex items-center text-gray-300 dark:text-gray-700 text-lg font-bold px-1">
+                ──►
+              </div>
+            )}
           </React.Fragment>
         ))}
       </div>
       {active !== null && (
-        <div className="mt-4 p-5 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40" style={{ animation: "fadeUp 0.3s ease" }}>
+        <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40" style={{ animation: "fadeUp 0.3s ease" }}>
           <div className="flex items-center gap-2 mb-1"><span className="text-xl">{DEPLOYMENT_STEPS[active].icon}</span><span className="font-bold text-blue-700 dark:text-blue-300">{DEPLOYMENT_STEPS[active].name}</span></div>
           <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{DEPLOYMENT_STEPS[active].detail}</p>
         </div>
@@ -380,12 +400,13 @@ export function HomeClient({ profile, featuredProjects, experiences, certificati
         @keyframes aurora1 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(60px, -40px) scale(1.15); } }
         @keyframes aurora2 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-50px, 30px) scale(1.1); } }
         @keyframes aurora3 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(30px, 50px) scale(1.08); } }
+        .float-y { animation: floatY 6s ease-in-out infinite; }
       `}</style>
 
       {showHireBanner && (
         <div className="fixed top-16 left-0 right-0 z-40 bg-gradient-to-r from-blue-600 to-violet-600 text-white text-center py-2.5 px-4 text-sm font-medium shadow-lg">
           🚀 Open to new opportunities —{" "}
-          <Link href="/contact" className="underline underline-offset-2 hover:text-blue-100">letlet&apos;s talkapos;s talk</Link>
+          <Link href="/contact" className="underline underline-offset-2 hover:text-blue-100">let&apos;s talk</Link>
         </div>
       )}
 
@@ -433,7 +454,7 @@ export function HomeClient({ profile, featuredProjects, experiences, certificati
                   <span className="relative inline-flex rounded-full h-5 w-5 bg-green-500 border-2 border-white dark:border-gray-900" />
                 </span>
                 {[{ tech: "Next.js", x: "-left-12", y: "top-6" }, { tech: "Django", x: "-right-12", y: "top-10" }, { tech: "AWS", x: "-left-10", y: "bottom-10" }, { tech: "Docker", x: "-right-10", y: "bottom-6" }].map(({ tech, x, y }) => (
-                  <span key={tech} className={`absolute ${x} ${y} px-3 py-1.5 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 shadow-lg`}>{tech}</span>
+                  <span key={tech} className={`hidden md:block absolute ${x} ${y} px-3 py-1.5 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 shadow-lg`}>{tech}</span>
                 ))}
               </div>
             </div>
