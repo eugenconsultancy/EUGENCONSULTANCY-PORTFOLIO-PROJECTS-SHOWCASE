@@ -15,7 +15,7 @@ export default async function AdminLayout({
       {session && <AdminSidebar />}
       <div className="flex-1 flex flex-col">
         {session && <AdminTopbar />}
-        <main className="flex-1 p-8 bg-gradient-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
+        <main className="flex-1 p-6 bg-gradient-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900 overflow-x-hidden">
           {children}
         </main>
       </div>
