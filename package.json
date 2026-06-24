@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build --no-lint",
     "start": "next start",
+    "postinstall": "prisma generate && mkdir -p public/uploads/projects public/uploads/avatars public/uploads/certifications",
     "lint": "next lint"
   },
   "prisma": {
