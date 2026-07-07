@@ -86,7 +86,6 @@ export function EditProjectForm({ project }: { project: ProjectWithImages }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
-      {/* fields unchanged */}
       <div>
         <label className="block text-sm font-medium mb-1">Title</label>
         <input type="text" name="title" defaultValue={project.title} className="w-full border p-2 rounded" required />
@@ -127,7 +126,6 @@ export function EditProjectForm({ project }: { project: ProjectWithImages }) {
         <input type="number" name="displayOrder" defaultValue={project.displayOrder} className="w-full border p-2 rounded" />
       </div>
 
-      {/* Framework Rationale */}
       <div>
         <label className="block text-sm font-medium mb-1">Framework Rationale</label>
         <textarea
@@ -143,31 +141,29 @@ export function EditProjectForm({ project }: { project: ProjectWithImages }) {
       <input type="hidden" name="body" value={body} />
       <ImageUploader
         projectId={project.id}
-        existingImages={project.images.map(img => ({ id: img.id, filename: img.filename }))}
+        existingImages={project.images.map((img) => ({ id: img.id, filename: img.filename }))}
         onInsertShortcode={handleInsertShortcode}
       />
 
-      {/* Case Study */}
       <div className="border-t pt-6 mt-6">
         <h3 className="text-lg font-semibold mb-4">Case Study (optional)</h3>
         <div>
           <label className="block text-sm font-medium mb-1">Problem</label>
-          <textarea value={problem} onChange={e => setProblem(e.target.value)} rows={3} className="w-full border p-2 rounded" />
+          <textarea value={problem} onChange={(e) => setProblem(e.target.value)} rows={3} className="w-full border p-2 rounded" />
         </div>
         <div className="mt-3">
           <label className="block text-sm font-medium mb-1">Approach</label>
-          <textarea value={approach} onChange={e => setApproach(e.target.value)} rows={3} className="w-full border p-2 rounded" />
+          <textarea value={approach} onChange={(e) => setApproach(e.target.value)} rows={3} className="w-full border p-2 rounded" />
         </div>
         <div className="mt-3">
           <label className="block text-sm font-medium mb-1">Result</label>
-          <textarea value={result} onChange={e => setResult(e.target.value)} rows={3} className="w-full border p-2 rounded" />
+          <textarea value={result} onChange={(e) => setResult(e.target.value)} rows={3} className="w-full border p-2 rounded" />
         </div>
         <div className="mt-3">
           <label className="block text-sm font-medium mb-1">Metrics</label>
-          <textarea value={metrics} onChange={e => setMetrics(e.target.value)} rows={2} className="w-full border p-2 rounded" />
+          <textarea value={metrics} onChange={(e) => setMetrics(e.target.value)} rows={2} className="w-full border p-2 rounded" />
         </div>
 
-        {/* Before / After Image Selection */}
         <div className="grid grid-cols-2 gap-4 mt-3">
           <div>
             <label className="block text-sm font-medium mb-1">Before Image</label>

@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createDraftProject, updateProjectsOrder } from "@/lib/actions/projects";
-import { useRouter } from "next/navigation";
 
 type ProjectListItem = {
   id: number;
@@ -16,7 +15,6 @@ type ProjectListItem = {
 export default function AdminProjectsPageClient() {
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -42,7 +40,7 @@ export default function AdminProjectsPageClient() {
   const saveOrder = async () => {
     const slugs = projects.map((p) => p.slug);
     await updateProjectsOrder(slugs);
-    router.refresh();
+    // The server action already redirects to /admin/projects – no client refresh needed
   };
 
   return (
@@ -59,7 +57,9 @@ export default function AdminProjectsPageClient() {
         />
         <div className="relative flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold tracking-widest text-blue-600 dark:text-blue-400 uppercase mb-2">Admin</p>
+            <p className="text-xs font-semibold tracking-widest text-blue-600 dark:text-blue-400 uppercase mb-2">
+              Admin
+            </p>
             <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
               Manage Projects
             </h1>
@@ -107,20 +107,18 @@ export default function AdminProjectsPageClient() {
                 onDragStart={() => handleDragStart(index)}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDragEnd={handleDragEnd}
-                className={`border-t border-gray-50 dark:border-gray-800 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50 ${
-                  draggingIndex === index ? "opacity-50" : ""
-                }`}
+                className={`border-t border-gray-50 dark:border-gray-800 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50 ${draggingIndex === index ? "opacity-50" : ""
+                  }`}
               >
                 <td className="p-4 text-sm font-medium text-gray-900 dark:text-white cursor-move">
                   {project.title}
                 </td>
                 <td className="p-4">
                   <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      project.status === "PUBLISHED"
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${project.status === "PUBLISHED"
                         ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
                         : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300"
-                    }`}
+                      }`}
                   >
                     {project.status}
                   </span>

@@ -25,24 +25,26 @@ export default async function EditProjectPage({
 
   if (!project) redirect("/admin/projects");
 
-  // The Prisma query now automatically returns frameworkRationale because it's a scalar field.
-  // The EditProjectForm type expects it, so it will be present.
-
   const viewCount = project.viewCount || 0;
   const commentCount = project._count.comments;
   const reactionCount = project._count.reactions;
 
-  const statusBadge = project.status === "PUBLISHED"
-    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
-    : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300";
+  const statusBadge =
+    project.status === "PUBLISHED"
+      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+      : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300";
 
   return (
     <div className="space-y-8">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-        <Link href="/admin" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Dashboard</Link>
+        <Link href="/admin" className="hover:text-blue-600 dark:hover:text-blue-400 transition">
+          Dashboard
+        </Link>
         <span>/</span>
-        <Link href="/admin/projects" className="hover:text-blue-600 dark:hover:text-blue-400 transition">Projects</Link>
+        <Link href="/admin/projects" className="hover:text-blue-600 dark:hover:text-blue-400 transition">
+          Projects
+        </Link>
         <span>/</span>
         <span className="text-gray-900 dark:text-white font-medium">Edit</span>
       </nav>
@@ -57,7 +59,8 @@ export default async function EditProjectPage({
         </div>
         <div className="flex items-center gap-2">
           <a
-            href={`/projects/${project.slug}${project.status === "DRAFT" && project.previewToken ? `?preview=${project.previewToken}` : ""}`}
+            href={`/projects/${project.slug}${project.status === "DRAFT" && project.previewToken ? `?preview=${project.previewToken}` : ""
+              }`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-sm font-medium hover:bg-blue-100 transition"
@@ -67,7 +70,10 @@ export default async function EditProjectPage({
           </a>
           <form action={deleteProjectByForm}>
             <input type="hidden" name="slug" value={project.slug} />
-            <button type="submit" className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm font-medium hover:bg-red-100 transition">
+            <button
+              type="submit"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm font-medium hover:bg-red-100 transition"
+            >
               <Trash2 className="w-4 h-4" />
               Delete
             </button>
