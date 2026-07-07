@@ -4,7 +4,6 @@ import { useState } from "react";
 import { MarkdownEditorWithPreview } from "./MarkdownEditorWithPreview";
 import { ImageUploader } from "./ImageUploader";
 import { updateProject, generatePreviewToken } from "@/lib/actions/projects";
-import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 type ProjectWithImages = {
@@ -31,7 +30,6 @@ type ProjectWithImages = {
 };
 
 export function EditProjectForm({ project }: { project: ProjectWithImages }) {
-  const router = useRouter();
   const [body, setBody] = useState(project.body);
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState(project.problem || "");
@@ -57,15 +55,15 @@ export function EditProjectForm({ project }: { project: ProjectWithImages }) {
     formData.append("metrics", metrics);
     formData.append("frameworkRationale", frameworkRationale);
 
-    // Only send image IDs if a valid option is selected (not "none")
     formData.append("beforeImageId", beforeImageId === "none" ? "" : beforeImageId);
     formData.append("afterImageId", afterImageId === "none" ? "" : afterImageId);
 
     try {
       await updateProject(project.slug, formData);
-      router.refresh();
+      // No router.refresh() – the server action already redirects
     } catch (error) {
       console.error(error);
+      toast.error("Failed to save project. Check console for details.");
     } finally {
       setSaving(false);
     }
@@ -78,7 +76,6 @@ export function EditProjectForm({ project }: { project: ProjectWithImages }) {
     toast.success("Preview URL copied! Share this secret link.");
   };
 
-  // Prepare image options for before/after selectors
   const imageOptions = [
     { value: "none", label: "— No image —" },
     ...project.images.map((img) => ({
@@ -89,6 +86,7 @@ export function EditProjectForm({ project }: { project: ProjectWithImages }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
+      {/* fields unchanged */}
       <div>
         <label className="block text-sm font-medium mb-1">Title</label>
         <input type="text" name="title" defaultValue={project.title} className="w-full border p-2 rounded" required />

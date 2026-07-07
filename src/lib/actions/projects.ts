@@ -57,17 +57,14 @@ export async function updateProject(slug: string, formData: FormData) {
 
   if (!parsed.success) throw new Error(parsed.error.message);
 
-  // Sanitize foreign keys: ensure they point to existing images
   const data = { ...parsed.data };
 
-  // Helper to validate an image ID – returns null if invalid or not found
   const validateImageId = async (id: number | undefined): Promise<number | null> => {
     if (id === undefined || isNaN(id) || id <= 0) return null;
     const img = await db.projectImage.findUnique({ where: { id } });
     return img ? id : null;
   };
 
-  // Convert null to undefined to match Zod schema (number | undefined)
   data.beforeImageId = (await validateImageId(data.beforeImageId)) ?? undefined;
   data.afterImageId = (await validateImageId(data.afterImageId)) ?? undefined;
 
@@ -86,6 +83,8 @@ export async function deleteProject(slug: string) {
 }
 
 export async function deleteProjectByForm(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (!session) throw new Error("Unauthorized");
   const slug = formData.get("slug") as string;
   if (!slug) throw new Error("Slug is required");
   await deleteProject(slug);
@@ -160,9 +159,8 @@ export async function deleteProjectImage(imageId: number) {
   const image = await db.projectImage.findUnique({ where: { id: imageId } });
   if (!image) throw new Error("Image not found");
 
-  // No local file deletion – images are now stored in Vercel Blob.
-  // If you need to delete the Blob, use: await del(image.filename);
-  // from '@vercel/blob' but ensure you store the blob URL's path correctly.
+  // Images are now stored in Vercel Blob (public store) – no local file deletion needed.
+  // If you want to delete the blob itself, import { del } from "@vercel/blob" and call del(image.filename).
 
   await db.projectImage.delete({ where: { id: imageId } });
   revalidatePath("/admin/projects/[slug]");
