@@ -18,7 +18,8 @@ export default function AdminProjectsPageClient() {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch("/api/admin/projects");
+      // Cache-busting: always fetch the most up-to-date list
+      const res = await fetch("/api/admin/projects?t=" + Date.now());
       const data = await res.json();
       setProjects(data);
     })();
