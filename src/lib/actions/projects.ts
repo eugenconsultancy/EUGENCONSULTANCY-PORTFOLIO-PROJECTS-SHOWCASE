@@ -8,8 +8,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { readingTime } from "@/lib/seo";
 import { v4 as uuidv4 } from "uuid";
-import { unlink } from "fs/promises";
-import path from "path";
 
 export async function createDraftProject() {
   const session = await getServerSession(authOptions);
@@ -34,7 +32,9 @@ export async function createDraftProject() {
 export async function updateProject(slug: string, formData: FormData) {
   const session = await getServerSession(authOptions);
   if (!session) throw new Error("Unauthorized");
+
   const raw = Object.fromEntries(formData.entries());
+
   const parsed = projectSchema.safeParse({
     title: raw.title,
     slug: raw.slug,
@@ -54,8 +54,24 @@ export async function updateProject(slug: string, formData: FormData) {
     afterImageId: raw.afterImageId ? parseInt(raw.afterImageId as string) : undefined,
     frameworkRationale: raw.frameworkRationale,
   });
+
   if (!parsed.success) throw new Error(parsed.error.message);
-  await db.project.update({ where: { slug }, data: parsed.data });
+
+  // Sanitize foreign keys: ensure they point to existing images
+  const data = { ...parsed.data };
+
+  // Helper to validate an image ID – returns null if invalid or not found
+  const validateImageId = async (id: number | undefined): Promise<number | null> => {
+    if (id === undefined || isNaN(id) || id <= 0) return null;
+    const img = await db.projectImage.findUnique({ where: { id } });
+    return img ? id : null;
+  };
+
+  // Convert null to undefined to match Zod schema (number | undefined)
+  data.beforeImageId = (await validateImageId(data.beforeImageId)) ?? undefined;
+  data.afterImageId = (await validateImageId(data.afterImageId)) ?? undefined;
+
+  await db.project.update({ where: { slug }, data });
   revalidatePath(`/projects/${slug}`);
   revalidatePath("/admin/projects");
   redirect("/admin/projects");
@@ -143,8 +159,11 @@ export async function deleteProjectImage(imageId: number) {
   if (!session) throw new Error("Unauthorized");
   const image = await db.projectImage.findUnique({ where: { id: imageId } });
   if (!image) throw new Error("Image not found");
-  const filePath = path.join(process.cwd(), "public", "uploads", "projects", image.filename);
-  try { await unlink(filePath); } catch { /* file may not exist */ }
+
+  // No local file deletion – images are now stored in Vercel Blob.
+  // If you need to delete the Blob, use: await del(image.filename);
+  // from '@vercel/blob' but ensure you store the blob URL's path correctly.
+
   await db.projectImage.delete({ where: { id: imageId } });
   revalidatePath("/admin/projects/[slug]");
   return { success: true };

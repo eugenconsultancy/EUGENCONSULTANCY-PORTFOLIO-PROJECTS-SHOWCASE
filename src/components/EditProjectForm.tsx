@@ -24,7 +24,7 @@ type ProjectWithImages = {
   approach: string | null;
   result: string | null;
   metrics: string | null;
-  frameworkRationale?: string | null;   // optional
+  frameworkRationale?: string | null;
   beforeImageId: number | null;
   afterImageId: number | null;
   images: { id: number; filename: string; alt: string | null }[];
@@ -56,8 +56,11 @@ export function EditProjectForm({ project }: { project: ProjectWithImages }) {
     formData.append("result", result);
     formData.append("metrics", metrics);
     formData.append("frameworkRationale", frameworkRationale);
-    formData.append("beforeImageId", beforeImageId);
-    formData.append("afterImageId", afterImageId);
+
+    // Only send image IDs if a valid option is selected (not "none")
+    formData.append("beforeImageId", beforeImageId === "none" ? "" : beforeImageId);
+    formData.append("afterImageId", afterImageId === "none" ? "" : afterImageId);
+
     try {
       await updateProject(project.slug, formData);
       router.refresh();
@@ -74,6 +77,15 @@ export function EditProjectForm({ project }: { project: ProjectWithImages }) {
     await navigator.clipboard.writeText(url);
     toast.success("Preview URL copied! Share this secret link.");
   };
+
+  // Prepare image options for before/after selectors
+  const imageOptions = [
+    { value: "none", label: "— No image —" },
+    ...project.images.map((img) => ({
+      value: img.id.toString(),
+      label: `Image #${img.id} (${img.filename})`,
+    })),
+  ];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
@@ -156,14 +168,36 @@ export function EditProjectForm({ project }: { project: ProjectWithImages }) {
           <label className="block text-sm font-medium mb-1">Metrics</label>
           <textarea value={metrics} onChange={e => setMetrics(e.target.value)} rows={2} className="w-full border p-2 rounded" />
         </div>
+
+        {/* Before / After Image Selection */}
         <div className="grid grid-cols-2 gap-4 mt-3">
           <div>
-            <label className="block text-sm font-medium mb-1">Before Image ID</label>
-            <input type="number" value={beforeImageId} onChange={e => setBeforeImageId(e.target.value)} className="w-full border p-2 rounded" />
+            <label className="block text-sm font-medium mb-1">Before Image</label>
+            <select
+              value={beforeImageId}
+              onChange={(e) => setBeforeImageId(e.target.value)}
+              className="w-full border p-2 rounded"
+            >
+              {imageOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">After Image ID</label>
-            <input type="number" value={afterImageId} onChange={e => setAfterImageId(e.target.value)} className="w-full border p-2 rounded" />
+            <label className="block text-sm font-medium mb-1">After Image</label>
+            <select
+              value={afterImageId}
+              onChange={(e) => setAfterImageId(e.target.value)}
+              className="w-full border p-2 rounded"
+            >
+              {imageOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
