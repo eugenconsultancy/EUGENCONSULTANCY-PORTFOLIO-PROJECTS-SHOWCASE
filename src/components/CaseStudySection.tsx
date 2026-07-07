@@ -20,7 +20,6 @@ export function CaseStudySection({
   beforeImage,
   afterImage,
 }: Props) {
-  // Parse metrics into an array of key‑value pairs
   const metricLines = metrics
     .split("\n")
     .map((line) => line.trim())
@@ -33,114 +32,139 @@ export function CaseStudySection({
       };
     });
 
+  const phases = [
+    {
+      dot: "bg-red-500",
+      border: "border-red-100 dark:border-red-900/40",
+      bg: "from-red-50/80 dark:from-red-950/20",
+      icon: <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />,
+      label: "Problem",
+      color: "text-red-600 dark:text-red-400",
+      content: problem,
+    },
+    {
+      dot: "bg-blue-500",
+      border: "border-blue-100 dark:border-blue-900/40",
+      bg: "from-blue-50/80 dark:from-blue-950/20",
+      icon: <Wrench className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
+      label: "Approach",
+      color: "text-blue-600 dark:text-blue-400",
+      content: approach,
+    },
+    {
+      dot: "bg-green-500",
+      border: "border-green-100 dark:border-green-900/40",
+      bg: "from-green-50/80 dark:from-green-950/20",
+      icon: <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />,
+      label: "Result",
+      color: "text-green-600 dark:text-green-400",
+      content: result,
+    },
+  ];
+
   return (
-    <div className="mt-16 space-y-12">
+    <div className="mt-20 space-y-14">
+
       {/* Header */}
       <div className="text-center">
-        <p className="text-xs font-semibold tracking-widest text-blue-600 dark:text-blue-400 uppercase mb-2">
+        <p className="inline-flex items-center gap-2 text-xs font-black tracking-[0.2em] text-blue-600 dark:text-blue-400 uppercase mb-3">
+          <span className="w-6 h-px bg-blue-500" />
           Case Study
+          <span className="w-6 h-px bg-blue-500" />
         </p>
-        <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+        <h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white tracking-tight">
           Project Breakdown
         </h2>
-        <p className="mt-2 text-gray-500 dark:text-gray-400">
-          Problem → Approach → Result
+        <p className="mt-2.5 text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+          A clear walkthrough of the problem, our approach, and the measurable outcomes.
         </p>
       </div>
 
-      {/* Timeline cards */}
-      <div className="relative border-l-2 border-blue-200 dark:border-blue-800 pl-8 space-y-10 ml-4">
-        {/* Problem */}
-        <div className="relative">
-          <div className="absolute -left-[2.15rem] top-1.5 w-4 h-4 rounded-full bg-red-500 border-2 border-white dark:border-gray-950" />
-          <div className="p-6 rounded-2xl bg-gradient-to-r from-red-50 to-transparent dark:from-red-950/20 dark:to-transparent border border-red-100 dark:border-red-900/30">
-            <div className="flex items-center gap-2 mb-3">
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
-              <h3 className="text-xl font-bold text-red-600 dark:text-red-400">Problem</h3>
+      {/* Timeline */}
+      <div className="relative border-l-2 border-gray-100 dark:border-gray-800 pl-8 ml-4 space-y-8">
+        {phases.map((phase) => (
+          <div key={phase.label} className="relative">
+            <div className={`absolute -left-[2.15rem] top-6 w-4 h-4 rounded-full ${phase.dot} border-2 border-white dark:border-gray-950 shadow-md`} />
+            <div className={`rounded-2xl border ${phase.border} bg-gradient-to-r ${phase.bg} to-transparent dark:to-transparent p-7`}>
+              <div className="flex items-center gap-2.5 mb-3">
+                {phase.icon}
+                <h3 className={`text-lg font-black ${phase.color}`}>{phase.label}</h3>
+              </div>
+              <p className="whitespace-pre-line text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
+                {phase.content}
+              </p>
             </div>
-            <p className="whitespace-pre-line text-gray-700 dark:text-gray-300">{problem}</p>
           </div>
-        </div>
-
-        {/* Approach */}
-        <div className="relative">
-          <div className="absolute -left-[2.15rem] top-1.5 w-4 h-4 rounded-full bg-blue-500 border-2 border-white dark:border-gray-950" />
-          <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-950/20 dark:to-transparent border border-blue-100 dark:border-blue-900/30">
-            <div className="flex items-center gap-2 mb-3">
-              <Wrench className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <h3 className="text-xl font-bold text-blue-600 dark:text-blue-400">Approach</h3>
-            </div>
-            <p className="whitespace-pre-line text-gray-700 dark:text-gray-300">{approach}</p>
-          </div>
-        </div>
-
-        {/* Result */}
-        <div className="relative">
-          <div className="absolute -left-[2.15rem] top-1.5 w-4 h-4 rounded-full bg-green-500 border-2 border-white dark:border-gray-950" />
-          <div className="p-6 rounded-2xl bg-gradient-to-r from-green-50 to-transparent dark:from-green-950/20 dark:to-transparent border border-green-100 dark:border-green-900/30">
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
-              <h3 className="text-xl font-bold text-green-600 dark:text-green-400">Result</h3>
-            </div>
-            <p className="whitespace-pre-line text-gray-700 dark:text-gray-300">{result}</p>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Metrics Dashboard */}
+      {/* Metrics dashboard */}
       {metricLines.length > 0 && (
         <div>
-          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <ArrowUpRight className="w-5 h-5" />
+          <h4 className="flex items-center gap-2 text-base font-black text-gray-900 dark:text-white mb-5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center shadow-md shadow-blue-500/25">
+              <ArrowUpRight className="w-4 h-4 text-white" />
+            </div>
             Key Metrics
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {metricLines.map((item, index) => (
               <div
                 key={index}
-                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow"
+                className="relative rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 hover:shadow-lg hover:-translate-y-0.5 hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-200 overflow-hidden group"
               >
-                <p className="text-2xl font-extrabold text-gray-900 dark:text-white">{item.value}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{item.label}</p>
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 to-violet-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                <p className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{item.value}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 font-medium leading-tight">{item.label}</p>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Before / After comparison */}
+      {/* Before / After */}
       {(beforeImage || afterImage) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {beforeImage && (
-            <div className="relative group rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-700">
-              <Image
-                src={beforeImage}
-                alt="Before"
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute top-3 left-3">
-                <span className="px-3 py-1 bg-red-500 text-white rounded-full text-xs font-medium">
-                  Before
-                </span>
-              </div>
+        <div>
+          <h4 className="flex items-center gap-2 text-base font-black text-gray-900 dark:text-white mb-5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-md shadow-orange-500/25">
+              <span className="text-white text-xs">⚡</span>
             </div>
-          )}
-          {afterImage && (
-            <div className="relative group rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-700">
-              <Image
-                src={afterImage}
-                alt="After"
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute top-3 left-3">
-                <span className="px-3 py-1 bg-green-500 text-white rounded-full text-xs font-medium">
-                  After
-                </span>
+            Before vs After
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {beforeImage && (
+              <div className="relative group rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800 h-64">
+                <Image
+                  src={beforeImage}
+                  alt="Before"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                <div className="absolute top-4 left-4">
+                  <span className="px-3 py-1.5 bg-red-500 text-white rounded-xl text-xs font-bold shadow-lg">
+                    Before
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+            {afterImage && (
+              <div className="relative group rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800 h-64">
+                <Image
+                  src={afterImage}
+                  alt="After"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                <div className="absolute top-4 left-4">
+                  <span className="px-3 py-1.5 bg-green-500 text-white rounded-xl text-xs font-bold shadow-lg">
+                    After
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
