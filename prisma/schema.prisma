@@ -1,10 +1,13 @@
+// prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")        // Pooling URL for serverless environments
+  directUrl = env("POSTGRES_URL_NON_POOLING")   // Non‑pooling URL for migrations
 }
 
 model Profile {
@@ -63,7 +66,7 @@ model Project {
   displayOrder       Int            @default(0)
   viewCount          Int            @default(0)
   previewToken       String?        @unique
-  frameworkRationale String?        // New field
+  frameworkRationale String?
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
   problem            String?
