@@ -52,12 +52,12 @@ const budgetRanges = [
 ];
 
 const benefits = [
-  { icon: <Code2 size={15} />, text: "Full-Stack Expertise", gradient: "from-blue-500 to-blue-600" },
-  { icon: <Palette size={15} />, text: "Modern UI/UX Design", gradient: "from-violet-500 to-violet-600" },
-  { icon: <Cloud size={15} />, text: "Cloud Deployment", gradient: "from-cyan-500 to-blue-500" },
-  { icon: <Layers size={15} />, text: "Scalable Architecture", gradient: "from-indigo-500 to-violet-600" },
-  { icon: <Globe size={15} />, text: "Global Delivery", gradient: "from-emerald-500 to-teal-500" },
-  { icon: <BarChart3 size={15} />, text: "Ongoing Support", gradient: "from-amber-500 to-orange-500" },
+  { icon: <Code2 size={14} />, text: "Full-Stack Expertise", gradient: "from-blue-500 to-blue-600" },
+  { icon: <Palette size={14} />, text: "Modern UI/UX Design", gradient: "from-violet-500 to-violet-600" },
+  { icon: <Cloud size={14} />, text: "Cloud Deployment", gradient: "from-cyan-500 to-blue-500" },
+  { icon: <Layers size={14} />, text: "Scalable Architecture", gradient: "from-indigo-500 to-violet-600" },
+  { icon: <Globe size={14} />, text: "Global Delivery", gradient: "from-emerald-500 to-teal-500" },
+  { icon: <BarChart3 size={14} />, text: "Ongoing Support", gradient: "from-amber-500 to-orange-500" },
 ];
 
 const contactInfo = [
@@ -103,7 +103,6 @@ const contactInfo = [
   },
 ];
 
-// Shared input classes
 const inputCls =
   "w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:focus:border-blue-500 transition-all duration-200";
 
@@ -185,9 +184,10 @@ export function ContactForm({ num1, num2, token }: Props) {
           <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-violet-400/8 dark:bg-violet-600/8 rounded-full blur-[100px]" />
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        {/* ── Wider wrapper ── */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
-          {/* ── Page header ────────────────────────────── */}
+          {/* Page header */}
           <div className="text-center mb-14" style={{ animation: "fadeUp 0.6s ease both" }}>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900/50 mb-5">
               <MessageCircle size={14} className="text-blue-600 dark:text-blue-400" />
@@ -207,11 +207,11 @@ export function ContactForm({ num1, num2, token }: Props) {
             </p>
           </div>
 
-          {/* ── Two-column layout ──────────────────────── */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 xl:gap-8 items-start">
+          {/* ── Two-column layout (form wider, sidebar narrower) ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 items-start">
 
-            {/* ── Left: Form ─────────────────────────── */}
-            <div className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl shadow-gray-100/80 dark:shadow-black/30 overflow-hidden">
+            {/* ── Left: Form ── */}
+            <div className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl shadow-gray-100/80 dark:shadow-black/30 overflow-hidden min-w-0">
               {/* Form header stripe */}
               <div className="px-7 pt-7 pb-6 border-b border-gray-50 dark:border-gray-800/80">
                 <div className="flex items-center gap-3">
@@ -220,7 +220,9 @@ export function ContactForm({ num1, num2, token }: Props) {
                   </div>
                   <div>
                     <h2 className="text-base font-black text-gray-900 dark:text-white">Send an Inquiry</h2>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">All fields marked are required</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                      All fields marked with <span className="text-blue-500">*</span> are required
+                    </p>
                   </div>
                 </div>
               </div>
@@ -229,7 +231,9 @@ export function ContactForm({ num1, num2, token }: Props) {
                 {/* Row 1: Name + Email */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className={labelCls}>Full Name <span className="text-blue-500">*</span></label>
+                    <label className={labelCls}>
+                      Full Name <span className="text-blue-500">*</span>
+                    </label>
                     <input
                       type="text"
                       name="name"
@@ -239,7 +243,9 @@ export function ContactForm({ num1, num2, token }: Props) {
                     />
                   </div>
                   <div>
-                    <label className={labelCls}>Email Address <span className="text-blue-500">*</span></label>
+                    <label className={labelCls}>
+                      Email Address <span className="text-blue-500">*</span>
+                    </label>
                     <input
                       type="email"
                       name="email"
@@ -253,7 +259,9 @@ export function ContactForm({ num1, num2, token }: Props) {
                 {/* Row 2: Service + Budget */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className={labelCls}>Service Needed <span className="text-blue-500">*</span></label>
+                    <label className={labelCls}>
+                      Service Needed <span className="text-blue-500">*</span>
+                    </label>
                     <div className="relative">
                       <select
                         name="service"
@@ -261,10 +269,19 @@ export function ContactForm({ num1, num2, token }: Props) {
                         defaultValue=""
                         className={`${inputCls} appearance-none pr-9 cursor-pointer`}
                       >
-                        <option value="" disabled>Select a service…</option>
-                        {services.map((s) => <option key={s} value={s}>{s}</option>)}
+                        <option value="" disabled>
+                          Select a service…
+                        </option>
+                        {services.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
                       </select>
-                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                      <ChevronDown
+                        size={13}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                      />
                     </div>
                   </div>
                   <div>
@@ -275,17 +292,28 @@ export function ContactForm({ num1, num2, token }: Props) {
                         defaultValue=""
                         className={`${inputCls} appearance-none pr-9 cursor-pointer`}
                       >
-                        <option value="" disabled>Select a range…</option>
-                        {budgetRanges.map((b) => <option key={b} value={b}>{b}</option>)}
+                        <option value="" disabled>
+                          Select a range…
+                        </option>
+                        {budgetRanges.map((b) => (
+                          <option key={b} value={b}>
+                            {b}
+                          </option>
+                        ))}
                       </select>
-                      <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                      <ChevronDown
+                        size={13}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                      />
                     </div>
                   </div>
                 </div>
 
                 {/* Subject */}
                 <div>
-                  <label className={labelCls}>Subject <span className="text-blue-500">*</span></label>
+                  <label className={labelCls}>
+                    Subject <span className="text-blue-500">*</span>
+                  </label>
                   <input
                     type="text"
                     name="subject"
@@ -301,7 +329,12 @@ export function ContactForm({ num1, num2, token }: Props) {
                     <label className={labelCls} style={{ marginBottom: 0 }}>
                       Message <span className="text-blue-500">*</span>
                     </label>
-                    <span className={`text-[10px] tabular-nums font-semibold transition-colors ${messageLen > 900 ? "text-amber-500" : "text-gray-400 dark:text-gray-600"}`}>
+                    <span
+                      className={`text-[10px] tabular-nums font-semibold transition-colors ${messageLen > 900
+                          ? "text-amber-500"
+                          : "text-gray-400 dark:text-gray-600"
+                        }`}
+                    >
                       {messageLen} / 1000
                     </span>
                   </div>
@@ -342,7 +375,10 @@ export function ContactForm({ num1, num2, token }: Props) {
                 </div>
 
                 {/* Honeypot */}
-                <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }} aria-hidden>
+                <div
+                  style={{ position: "absolute", left: "-9999px", top: "-9999px" }}
+                  aria-hidden
+                >
                   <input type="text" name="honeypot" tabIndex={-1} autoComplete="off" />
                 </div>
 
@@ -368,7 +404,7 @@ export function ContactForm({ num1, num2, token }: Props) {
               </form>
             </div>
 
-            {/* ── Right: Info panels (stacked, no overflow) ── */}
+            {/* ── Right: Info panels ── */}
             <div className="flex flex-col gap-5 min-w-0">
 
               {/* Availability pill */}
@@ -378,8 +414,12 @@ export function ContactForm({ num1, num2, token }: Props) {
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500" />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-black text-green-800 dark:text-green-300 leading-tight">Available for Projects</p>
-                  <p className="text-xs text-green-600 dark:text-green-500 mt-0.5">Open for freelance & consultancy</p>
+                  <p className="text-sm font-black text-green-800 dark:text-green-300 leading-tight">
+                    Available for Projects
+                  </p>
+                  <p className="text-xs text-green-600 dark:text-green-500 mt-0.5">
+                    Open for freelance & consultancy
+                  </p>
                 </div>
               </div>
 
@@ -392,12 +432,19 @@ export function ContactForm({ num1, num2, token }: Props) {
                 </div>
                 <ul className="divide-y divide-gray-50 dark:divide-gray-800/60">
                   {contactInfo.map((item) => (
-                    <li key={item.label} className="flex items-center gap-4 px-6 py-4 group hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
-                      <div className={`w-8 h-8 rounded-xl ${item.bg} flex items-center justify-center flex-shrink-0`}>
+                    <li
+                      key={item.label}
+                      className="flex items-center gap-4 px-6 py-4 group hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors"
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-xl ${item.bg} flex items-center justify-center flex-shrink-0`}
+                      >
                         <span className={item.iconColor}>{item.icon}</span>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-0.5">{item.label}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-0.5">
+                          {item.label}
+                        </p>
                         {item.href ? (
                           <a
                             href={item.href}
@@ -406,7 +453,9 @@ export function ContactForm({ num1, num2, token }: Props) {
                             {item.value}
                           </a>
                         ) : (
-                          <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{item.value}</p>
+                          <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
+                            {item.value}
+                          </p>
                         )}
                       </div>
                     </li>
@@ -424,10 +473,14 @@ export function ContactForm({ num1, num2, token }: Props) {
                 <ul className="p-5 grid grid-cols-2 gap-3">
                   {benefits.map((b) => (
                     <li key={b.text} className="flex items-center gap-2.5 group">
-                      <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${b.gradient} flex items-center justify-center text-white flex-shrink-0 shadow-sm`}>
+                      <div
+                        className={`w-7 h-7 rounded-lg bg-gradient-to-br ${b.gradient} flex items-center justify-center text-white flex-shrink-0 shadow-sm`}
+                      >
                         {b.icon}
                       </div>
-                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 leading-tight">{b.text}</span>
+                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 leading-tight">
+                        {b.text}
+                      </span>
                     </li>
                   ))}
                 </ul>
