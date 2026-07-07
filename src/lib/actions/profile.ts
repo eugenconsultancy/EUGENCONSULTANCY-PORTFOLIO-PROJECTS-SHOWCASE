@@ -6,9 +6,7 @@ import { db } from "@/lib/db";
 import { profileSchema, experienceSchema, certificationSchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { writeFile } from "fs/promises";
-import { existsSync, mkdirSync } from "fs";
-import path from "path";
+import { put } from "@vercel/blob";
 
 export async function updateProfile(formData: FormData) {
   const session = await getServerSession(authOptions);
@@ -39,21 +37,22 @@ export async function updateProfile(formData: FormData) {
     await db.profile.create({ data: parsed.data });
   }
 
-  // Picture
+  // Upload profile picture to Vercel Blob (if a new file was provided)
   const pictureFile = formData.get("picture") as File | null;
   if (pictureFile && pictureFile.size > 0) {
-    const bytes = await pictureFile.arrayBuffer();
-    const buffer = Buffer.from(bytes);
     const ext = pictureFile.name.split(".").pop() || "jpg";
-    const filename = `avatar-${Date.now()}.${ext}`;
-    const avatarDir = path.join(process.cwd(), "public", "uploads", "avatars");
-    if (!existsSync(avatarDir)) mkdirSync(avatarDir, { recursive: true });
-    await writeFile(path.join(avatarDir, filename), buffer);
-    const picturePath = `/uploads/avatars/${filename}`;
-    await db.profile.update({
-      where: { id: existing?.id ?? (await db.profile.findFirst())?.id ?? 1 },
-      data: { picture: picturePath },
+    const blob = await put(`avatars/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`, pictureFile, {
+      access: "public",
     });
+
+    // Update the profile with the new picture URL
+    const profileId = existing?.id ?? (await db.profile.findFirst())?.id;
+    if (profileId) {
+      await db.profile.update({
+        where: { id: profileId },
+        data: { picture: blob.url },
+      });
+    }
   }
 
   revalidatePath("/");
@@ -98,22 +97,19 @@ export async function addCertification(formData: FormData) {
   const parsed = certificationSchema.safeParse(raw);
   if (!parsed.success) throw new Error(parsed.error.message);
 
-  // handle logo upload
-  let logoPath = "";
+  // Handle logo upload via Vercel Blob
+  let logoUrl: string | null = null;
   const logoFile = formData.get("logo") as File | null;
   if (logoFile && logoFile.size > 0) {
-    const bytes = await logoFile.arrayBuffer();
-    const buffer = Buffer.from(bytes);
     const ext = logoFile.name.split(".").pop() || "png";
-    const filename = `cert-${Date.now()}.${ext}`;
-    const certDir = path.join(process.cwd(), "public", "uploads", "certifications");
-    if (!existsSync(certDir)) mkdirSync(certDir, { recursive: true });
-    await writeFile(path.join(certDir, filename), buffer);
-    logoPath = `/uploads/certifications/${filename}`;
+    const blob = await put(`certifications/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`, logoFile, {
+      access: "public",
+    });
+    logoUrl = blob.url;
   }
 
   await db.certification.create({
-    data: { ...parsed.data, profileId: profile.id, logo: logoPath || null },
+    data: { ...parsed.data, profileId: profile.id, logo: logoUrl },
   });
   revalidatePath("/");
   revalidatePath("/admin/settings");
