@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { ContactForm } from "@/components/ContactForm";
 import { generateMathChallenge } from "@/lib/spam";
 
@@ -5,7 +6,7 @@ export default function ContactPage() {
     const { num1, num2, token } = generateMathChallenge();
 
     return (
-        <main className="max-w-6xl mx-auto px-4 py-16">
+        <main className="max-w-6xl mx-auto px-4 py-16 overflow-x-hidden">
             <h1 className="text-3xl font-bold mb-8">Contact Me</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">

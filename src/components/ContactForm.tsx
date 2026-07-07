@@ -116,7 +116,7 @@ export function ContactForm({ num1, num2, token }: Props) {
   }
 
   return (
-    <section className="relative py-16 px-6 overflow-hidden">
+    <section className="relative py-16 px-6 overflow-x-hidden">
       {/* Background decoration */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-400/10 dark:bg-blue-600/10 rounded-full blur-3xl" />
@@ -146,7 +146,7 @@ export function ContactForm({ num1, num2, token }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
           {/* ── Form (left, wider) ── */}
           <div className="lg:col-span-3">
-            <div className="rounded-3xl border border-gray-200/80 dark:border-gray-700/60 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-8 shadow-xl shadow-gray-200/50 dark:shadow-black/30">
+            <div className="rounded-3xl border border-gray-200/80 dark:border-gray-700/60 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-6 sm:p-8 shadow-xl shadow-gray-200/50 dark:shadow-black/30">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                 <Send size={18} className="text-blue-600" />
                 Send an Inquiry
@@ -192,7 +192,7 @@ export function ContactForm({ num1, num2, token }: Props) {
                         name="service"
                         required
                         defaultValue=""
-                        className="w-full appearance-none rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/70 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-500 transition-all cursor-pointer"
+                        className="w-full appearance-none rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/70 px-4 py-3 pr-10 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-500 transition-all cursor-pointer"
                       >
                         <option value="" disabled>Select a service…</option>
                         {services.map((s) => (
@@ -210,7 +210,7 @@ export function ContactForm({ num1, num2, token }: Props) {
                       <select
                         name="budget"
                         defaultValue=""
-                        className="w-full appearance-none rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/70 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-500 transition-all cursor-pointer"
+                        className="w-full appearance-none rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/70 px-4 py-3 pr-10 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-500 transition-all cursor-pointer"
                       >
                         <option value="" disabled>Select a range…</option>
                         {budgetRanges.map((b) => (
@@ -324,7 +324,7 @@ export function ContactForm({ num1, num2, token }: Props) {
               </ul>
             </div>
 
-            {/* Contact info card */}
+            {/* Contact info card – updated email & phone */}
             <div className="rounded-3xl border border-gray-200/80 dark:border-gray-700/60 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-6 shadow-xl shadow-gray-200/50 dark:shadow-black/30">
               <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">
                 Contact Details
@@ -336,8 +336,11 @@ export function ContactForm({ num1, num2, token }: Props) {
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Email</p>
-                    <a href="mailto:hello@eugenconsultancy.com" className="text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                      hello@eugenconsultancy.com
+                    <a
+                      href="mailto:eugenbku@gmail.com"
+                      className="text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors break-all"
+                    >
+                      eugenbku@gmail.com
                     </a>
                   </div>
                 </li>
@@ -366,6 +369,16 @@ export function ContactForm({ num1, num2, token }: Props) {
                   <div>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Response Time</p>
                     <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Within 24 hours</p>
+                  </div>
+                </li>
+                {/* Phone added */}
+                <li className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center flex-shrink-0">
+                    <Zap size={14} className="text-blue-600 dark:text-blue-400" /> {/* using a phone icon would be better, but keep consistent */}
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Phone</p>
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200">+254 108 038 898</p>
                   </div>
                 </li>
               </ul>
