@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { Card } from "@/components/Card";
+import Card from "@/components/Card";
 import { ClicksAreaChart } from "@/components/ClicksAreaChart";
 
 export default async function AnalyticsPage() {
@@ -15,8 +15,8 @@ export default async function AnalyticsPage() {
   const topProject = projects.length > 0 ? projects[0] : null;
 
   // Monthly clicks
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const now = new Date();
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
   const clicks = await db.projectClick.findMany({
     where: { createdAt: { gte: sixMonthsAgo } },
     select: { createdAt: true },
@@ -24,8 +24,7 @@ export default async function AnalyticsPage() {
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const monthlyClicks: { month: string; count: number }[] = [];
   for (let i = 5; i >= 0; i--) {
-    const d = new Date();
-    d.setMonth(d.getMonth() - i);
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const key = monthNames[d.getMonth()] + " " + d.getFullYear().toString().slice(-2);
     monthlyClicks.push({ month: key, count: 0 });
   }
