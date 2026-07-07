@@ -46,7 +46,7 @@ export function ProjectModal({
 
   const processedBody = processMarkdownImages(project.body, project.images);
   const imageList = project.images.map((img) => ({
-    src: `/uploads/projects/${img.filename}`,
+    src: `${img.filename}`,
     alt: img.alt || img.filename,
   }));
   const readTime = readingTime(project.body);

@@ -198,7 +198,7 @@ function ProjectCarousel({ projects }: { projects: ProjectCard[] }) {
               className="group flex-shrink-0 w-80 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden hover:-translate-y-2 hover:shadow-2xl hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300">
               <div className="relative h-44 bg-gray-100 dark:bg-gray-800 overflow-hidden">
                 {mainImage ? (
-                  <Image src={`/uploads/projects/${mainImage.filename}`} alt={mainImage.alt ?? project.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <Image src={`${mainImage.filename}`} alt={mainImage.alt ?? project.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-violet-100 dark:from-gray-800 dark:to-gray-700"><span className="text-5xl opacity-25">📦</span></div>
                 )}

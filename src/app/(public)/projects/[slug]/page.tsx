@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
   const imageUrl = project.images.length > 0
-    ? `${baseUrl}/uploads/projects/${project.images[0].filename}`
+    ? `${project.images[0].filename}`
     : `${baseUrl}/api/og?title=${encodeURIComponent(project.title)}&tech=`;
 
   return {
@@ -112,7 +112,7 @@ export default async function ProjectDetailPage({
 
   const processedBody = processMarkdownImages(project.body, project.images);
   const imageList = project.images.map(img => ({
-    src: `/uploads/projects/${img.filename}`,
+    src: `${img.filename}`,
     alt: img.alt || img.filename,
   }));
   const readTime = readingTime(project.body);
@@ -220,8 +220,8 @@ export default async function ProjectDetailPage({
               approach={project.approach || ""}
               result={project.result || ""}
               metrics={project.metrics || ""}
-              beforeImage={project.beforeImage ? `/uploads/projects/${project.beforeImage.filename}` : undefined}
-              afterImage={project.afterImage ? `/uploads/projects/${project.afterImage.filename}` : undefined}
+              beforeImage={project.beforeImage ? `${project.beforeImage.filename}` : undefined}
+              afterImage={project.afterImage ? `${project.afterImage.filename}` : undefined}
             />
           </div>
         )}

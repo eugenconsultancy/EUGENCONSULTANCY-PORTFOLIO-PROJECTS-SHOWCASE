@@ -179,7 +179,7 @@ function CarouselRow({
             <div className="relative h-44 bg-gray-100 dark:bg-gray-800 overflow-hidden">
               {mainImage ? (
                 <Image
-                  src={`/uploads/projects/${mainImage.filename}`}
+                  src={`${mainImage.filename}`}
                   alt={mainImage.alt ?? project.title}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"

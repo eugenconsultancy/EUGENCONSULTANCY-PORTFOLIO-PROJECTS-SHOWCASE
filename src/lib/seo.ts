@@ -49,7 +49,7 @@ export function projectJsonLd(project: {
     url: `${baseUrl}/projects/${project.slug}`,
     datePublished: project.createdAt.toISOString(),
     image: project.images.length > 0
-      ? `${baseUrl}/uploads/projects/${project.images[0].filename}`
+      ? `${project.images[0].filename}`
       : undefined,
   };
 }

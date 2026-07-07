@@ -12,7 +12,7 @@ export function processMarkdownImages(
     return markdown.replace(/\[img:(\d+)\]/g, (match, id) => {
         const img = images.find((img) => img.id === parseInt(id));
         if (img) {
-            return `![${img.alt || "image"}](/uploads/projects/${img.filename})`;
+            return `![${img.alt || "image"}](${img.filename})`;
         }
         // If image not found, return original shortcode as fallback
         return match;

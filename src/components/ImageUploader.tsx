@@ -80,7 +80,7 @@ export function ImageUploader({
             className="relative border rounded overflow-hidden w-32 h-32 group"
           >
             <Image
-              src={img.url || `/uploads/projects/${img.filename}`}
+              src={img.url || `${img.filename}`}
               alt=""
               fill
               className="object-cover"

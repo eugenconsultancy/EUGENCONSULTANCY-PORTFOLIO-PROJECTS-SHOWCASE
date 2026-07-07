@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { writeFile } from "fs/promises";
-import { existsSync, mkdirSync } from "fs";
-import path from "path";
-import { v4 as uuidv4 } from "uuid";
+import { put } from "@vercel/blob";
 
 export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
@@ -22,21 +19,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    // Upload to Vercel Blob – 'access: public' makes the image directly viewable
+    const blob = await put(file.name, file, { access: "public" });
 
-    const ext = file.name.split(".").pop() || "jpg";
-    const filename = `${uuidv4()}.${ext}`;
-
-    // Ensure the uploads directory exists
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "projects");
-    if (!existsSync(uploadDir)) {
-        mkdirSync(uploadDir, { recursive: true });
-    }
-
-    // Write the file
-    await writeFile(path.join(uploadDir, filename), buffer);
-
+    // If a projectId was passed, associate the image with the project
     let imgProjectId: number | null = null;
     if (projectId) {
         imgProjectId = parseInt(projectId, 10);
@@ -45,14 +31,14 @@ export async function POST(req: NextRequest) {
     const image = await db.projectImage.create({
         data: {
             projectId: imgProjectId,
-            filename,
+            filename: blob.url,   // store the full URL, not just the filename
             alt: alt || file.name,
         },
     });
 
     return NextResponse.json({
         id: image.id,
-        filename,
-        url: `/uploads/projects/${filename}`,
+        filename: blob.url,
+        url: blob.url,
     });
 }
