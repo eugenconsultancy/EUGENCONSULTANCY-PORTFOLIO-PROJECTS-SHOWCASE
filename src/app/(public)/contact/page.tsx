@@ -6,12 +6,12 @@ export default function ContactPage() {
     const { num1, num2, token } = generateMathChallenge();
 
     return (
-        <main className="max-w-6xl mx-auto px-4 py-16 overflow-x-hidden">
+        <div className="py-8">
             <h1 className="text-3xl font-bold mb-8">Contact Me</h1>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                {/* Contact Form */}
-                <div>
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12">
+                {/* Contact Form – now takes the full available width minus sidebar */}
+                <div className="min-w-0">
                     <ContactForm num1={num1} num2={num2} token={token} />
                 </div>
 
@@ -19,12 +19,9 @@ export default function ContactPage() {
                 <div className="space-y-6">
                     <div>
                         <h2 className="text-xl font-semibold mb-2">📍 Location</h2>
-                        <p className="text-gray-600 dark:text-gray-400">
-                            Nairobi, Kenya
-                        </p>
+                        <p className="text-gray-600 dark:text-gray-400">Nairobi, Kenya</p>
                     </div>
 
-                    {/* OpenStreetMap iframe (free, no API key) */}
                     <div className="w-full h-64 md:h-80 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
                         <iframe
                             title="Location Map"
@@ -43,6 +40,6 @@ export default function ContactPage() {
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }
