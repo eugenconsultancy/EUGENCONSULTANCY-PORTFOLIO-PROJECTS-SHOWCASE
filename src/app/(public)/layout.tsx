@@ -38,13 +38,13 @@ export default async function PublicLayout({
       <CommandPalette items={commandItems} />
 
       <PageTransition>
-        {/* ───── Navbar offset + safe area for mobile bottom nav ───── */}
-        <main className="mx-auto max-w-[1440px] px-6 pt-28 pb-24 lg:px-8 lg:pt-32">
+        {/* Navbar offset (navbar h-16 = 4rem, so pt-20 = 5rem gives a little breathing room) + safe area for mobile bottom nav */}
+        <main className="mx-auto max-w-[1440px] px-6 pt-20 pb-24 lg:px-8 lg:pt-24">
           {children}
         </main>
       </PageTransition>
 
-      {/* ───── Gradient divider ───── */}
+      {/* Gradient divider */}
       <div className="mx-auto max-w-[1440px] px-6 lg:px-8">
         <hr className="h-px border-0 bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent" />
       </div>
