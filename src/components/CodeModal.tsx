@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 
 type Props = {
   code: string;
@@ -25,9 +26,9 @@ export function CodeModal({ code, language, onClose }: Props) {
     };
   }, [handleKeyDown]);
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
@@ -46,6 +47,7 @@ export function CodeModal({ code, language, onClose }: Props) {
           <code className={`language-${language || "text"}`}>{code}</code>
         </pre>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 
 type Props = {
@@ -36,9 +37,9 @@ export function Lightbox({ images, currentIndex, onClose, onPrev, onNext }: Prop
 
   if (!current) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl"
+      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/95 backdrop-blur-xl"
       onClick={onClose}
     >
       {/* Image counter */}
@@ -95,6 +96,7 @@ export function Lightbox({ images, currentIndex, onClose, onPrev, onNext }: Prop
           </svg>
         </button>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }

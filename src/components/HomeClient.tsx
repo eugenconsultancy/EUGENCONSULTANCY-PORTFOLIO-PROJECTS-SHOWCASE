@@ -53,7 +53,6 @@ type Certification = {
 const TYPED_PHRASES = [
   "That Scale Businesses.",
   "For Web, Mobile & Cloud.",
-  "With AI at the Core.",
   "Built for Long-Term Growth.",
   "Delivered to Production.",
 ];
@@ -403,8 +402,8 @@ function DeploymentJourney() {
             <button
               onClick={() => setActive(active === i ? null : i)}
               className={`group flex flex-col items-center text-center p-4 rounded-2xl transition-all duration-200 min-w-[100px] ${active === i
-                  ? "bg-gradient-to-br from-blue-600 to-violet-600 text-white shadow-xl shadow-blue-500/30 scale-105"
-                  : "bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:border-blue-300 hover:shadow-lg dark:hover:border-blue-700"
+                ? "bg-gradient-to-br from-blue-600 to-violet-600 text-white shadow-xl shadow-blue-500/30 scale-105"
+                : "bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:border-blue-300 hover:shadow-lg dark:hover:border-blue-700"
                 }`}
             >
               <span className="text-2xl mb-1.5">{step.icon}</span>

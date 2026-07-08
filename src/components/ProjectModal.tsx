@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { ProjectImagesRenderer } from "./ProjectImagesRenderer";
 import { processMarkdownImages } from "@/lib/markdown";
@@ -68,7 +69,7 @@ export function ProjectModal({
 
   // ── Loading state ──
   if (!project) {
-    return (
+    const loadingOverlay = (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin" />
@@ -76,6 +77,7 @@ export function ProjectModal({
         </div>
       </div>
     );
+    return createPortal(loadingOverlay, document.body);
   }
 
   const processedBody = processMarkdownImages(project.body, project.images);
@@ -93,9 +95,9 @@ export function ProjectModal({
     ...(hasCaseStudy ? [{ id: "casestudy" as const, icon: <FileText size={15} />, label: "Case Study" }] : []),
   ];
 
-  return (
+  const modalContent = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 sm:p-6"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 sm:p-6"
       onClick={onClose}
     >
       <div
@@ -156,8 +158,8 @@ export function ProjectModal({
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all -mb-px ${activeTab === tab.id
-                  ? "border-blue-600 text-blue-600 dark:text-blue-400"
-                  : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                ? "border-blue-600 text-blue-600 dark:text-blue-400"
+                : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
             >
               {tab.icon}
@@ -291,8 +293,8 @@ export function ProjectModal({
                           key={idx}
                           onClick={() => setGalleryIdx(idx)}
                           className={`relative w-20 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition ${idx === galleryIdx
-                              ? "border-blue-500 ring-2 ring-blue-500/30"
-                              : "border-transparent hover:border-gray-300 dark:hover:border-gray-600 opacity-70 hover:opacity-100"
+                            ? "border-blue-500 ring-2 ring-blue-500/30"
+                            : "border-transparent hover:border-gray-300 dark:hover:border-gray-600 opacity-70 hover:opacity-100"
                             }`}
                         >
                           <Image
@@ -354,4 +356,6 @@ export function ProjectModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
