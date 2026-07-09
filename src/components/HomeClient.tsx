@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { LatestProjectsGrid } from "@/components/LatestProjectsGrid";
 
 // ─── Types ────────────────────────────────────────────
 type ProfileData = {
@@ -502,12 +503,13 @@ function SectionHeading({ children, sub, center }: { children: React.ReactNode; 
 // ─── Main component ───────────────────────────────────
 interface HomeClientProps {
   profile: ProfileData;
+  latestProjects: ProjectCard[];
   featuredProjects: ProjectCard[];
   experiences: Experience[];
   certifications: Certification[];
 }
 
-export function HomeClient({ profile, featuredProjects, experiences, certifications }: HomeClientProps) {
+export function HomeClient({ profile, latestProjects, featuredProjects, experiences, certifications }: HomeClientProps) {
   const statsSection = useInView(0.3);
   const showHireBanner = profile.status?.toLowerCase().includes("hire");
 
@@ -674,32 +676,10 @@ export function HomeClient({ profile, featuredProjects, experiences, certificati
           </div>
         </section>
 
-        {/* ── WHO I BUILD FOR ────────────────────────────── */}
-        <section className="py-28 bg-white dark:bg-gray-950">
-          <div className="max-w-7xl mx-auto px-6 sm:px-8">
-            <SectionLabel>Industries served</SectionLabel>
-            <SectionHeading sub="Deep domain knowledge across the industries that matter most.">Who We Build For</SectionHeading>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {INDUSTRIES.map((ind) => (
-                <div key={ind.name} className="group relative rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 hover:-translate-y-2 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-violet-50/30 dark:from-blue-950/20 dark:to-violet-950/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="relative">
-                    <span className="text-3xl mb-4 block">{ind.icon}</span>
-                    <h3 className="font-black text-gray-900 dark:text-white text-lg mb-3">{ind.name}</h3>
-                    <ul className="space-y-1.5">
-                      {ind.items.map((item) => (
-                        <li key={item} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* ── LATEST PUBLISHED PROJECTS (2×2 Grid) ──────────── */}
+        {latestProjects.length > 0 && (
+          <LatestProjectsGrid projects={latestProjects} />
+        )}
 
         {/* ── PROFESSIONAL IDENTITY ──────────────────────── */}
         <section className="py-28 bg-gray-50 dark:bg-gray-950/60">
@@ -744,8 +724,35 @@ export function HomeClient({ profile, featuredProjects, experiences, certificati
           </div>
         </section>
 
-        {/* ── FEATURED SERVICES ──────────────────────────── */}
+        {/* ── WHO I BUILD FOR ────────────────────────────── */}
         <section className="py-28 bg-white dark:bg-gray-950">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8">
+            <SectionLabel>Industries served</SectionLabel>
+            <SectionHeading sub="Deep domain knowledge across the industries that matter most.">Who We Build For</SectionHeading>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {INDUSTRIES.map((ind) => (
+                <div key={ind.name} className="group relative rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 hover:-translate-y-2 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-violet-50/30 dark:from-blue-950/20 dark:to-violet-950/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="relative">
+                    <span className="text-3xl mb-4 block">{ind.icon}</span>
+                    <h3 className="font-black text-gray-900 dark:text-white text-lg mb-3">{ind.name}</h3>
+                    <ul className="space-y-1.5">
+                      {ind.items.map((item) => (
+                        <li key={item} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── FEATURED SERVICES ──────────────────────────── */}
+        <section className="py-28 bg-gray-50 dark:bg-gray-950/60">
           <div className="max-w-7xl mx-auto px-6 sm:px-8">
             <SectionLabel>What we offer</SectionLabel>
             <SectionHeading sub="End-to-end engineering, deployment, and strategy — all under one roof.">Featured Services</SectionHeading>
@@ -767,24 +774,6 @@ export function HomeClient({ profile, featuredProjects, experiences, certificati
             </div>
           </div>
         </section>
-
-        {/* ── FEATURED PROJECTS ──────────────────────────── */}
-        {featuredProjects.length > 0 && (
-          <section className="py-28 bg-gray-50 dark:bg-gray-950/60">
-            <div className="max-w-7xl mx-auto px-6 sm:px-8 mb-10">
-              <div className="flex items-end justify-between">
-                <div>
-                  <SectionLabel>Selected work</SectionLabel>
-                  <SectionHeading sub="Hover to pause · Click to explore the full case study.">Featured Projects</SectionHeading>
-                </div>
-                <Link href="/projects" className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline underline-offset-2 whitespace-nowrap mb-12">
-                  View all →
-                </Link>
-              </div>
-            </div>
-            <ProjectCarousel projects={featuredProjects} />
-          </section>
-        )}
 
         {/* ── HOW WE BUILD SOFTWARE ──────────────────────── */}
         <section className="py-28 bg-white dark:bg-gray-950">
@@ -828,9 +817,27 @@ export function HomeClient({ profile, featuredProjects, experiences, certificati
           </div>
         </section>
 
+        {/* ── PROJECT ARCHIVE (Carousel) ──────────────────── */}
+        {featuredProjects.length > 0 && (
+          <section className="py-28 bg-gray-50 dark:bg-gray-950/60">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 mb-10">
+              <div className="flex items-end justify-between">
+                <div>
+                  <SectionLabel>Project Archive</SectionLabel>
+                  <SectionHeading sub="Browse more projects · Hover to pause · Click to explore full case studies.">Explore All Case Studies</SectionHeading>
+                </div>
+                <Link href="/projects" className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline underline-offset-2 whitespace-nowrap mb-12">
+                  View all →
+                </Link>
+              </div>
+            </div>
+            <ProjectCarousel projects={featuredProjects} />
+          </section>
+        )}
+
         {/* ── EXPERIENCE ─────────────────────────────────── */}
         {experiences.length > 0 && (
-          <section className="py-28 bg-gray-50 dark:bg-gray-950/60">
+          <section className="py-28 bg-white dark:bg-gray-950">
             <div className="max-w-3xl mx-auto px-6 sm:px-8">
               <SectionLabel>Career journey</SectionLabel>
               <SectionHeading sub="Roles, milestones, and the companies we've been proud to build with.">Experience</SectionHeading>
@@ -840,7 +847,7 @@ export function HomeClient({ profile, featuredProjects, experiences, certificati
         )}
 
         {/* ── WHY CHOOSE US ──────────────────────────────── */}
-        <section className="py-28 bg-white dark:bg-gray-950">
+        <section className="py-28 bg-gray-50 dark:bg-gray-950/60">
           <div className="max-w-7xl mx-auto px-6 sm:px-8">
             <SectionLabel>Our edge</SectionLabel>
             <SectionHeading sub="What makes working with us different from any other engineering team.">Why Clients Choose Us</SectionHeading>
@@ -862,7 +869,7 @@ export function HomeClient({ profile, featuredProjects, experiences, certificati
 
         {/* ── CERTIFICATIONS ─────────────────────────────── */}
         {certifications.length > 0 && (
-          <section className="py-28 bg-gray-50 dark:bg-gray-950/60">
+          <section className="py-28 bg-white dark:bg-gray-950">
             <div className="max-w-7xl mx-auto px-6 sm:px-8">
               <SectionLabel>Credentials</SectionLabel>
               <SectionHeading sub="Verified professional certifications from globally recognised institutions.">Certifications</SectionHeading>
@@ -872,7 +879,7 @@ export function HomeClient({ profile, featuredProjects, experiences, certificati
         )}
 
         {/* ── TESTIMONIALS ───────────────────────────────── */}
-        <section className="py-28 bg-white dark:bg-gray-950">
+        <section className="py-28 bg-gray-50 dark:bg-gray-950/60">
           <div className="max-w-3xl mx-auto px-6 sm:px-8">
             <SectionLabel>Client feedback</SectionLabel>
             <SectionHeading sub="Words from the teams we've had the privilege of building with." center>Testimonials</SectionHeading>
@@ -882,7 +889,7 @@ export function HomeClient({ profile, featuredProjects, experiences, certificati
 
         {/* ── AVAILABILITY ───────────────────────────────── */}
         {profile.availability && (
-          <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
+          <section className="py-20 bg-white dark:bg-gray-950">
             <div className="max-w-3xl mx-auto px-6 sm:px-8">
               <SectionLabel>Engagement model</SectionLabel>
               <SectionHeading sub="How and when we can work together.">Availability</SectionHeading>
@@ -897,7 +904,7 @@ export function HomeClient({ profile, featuredProjects, experiences, certificati
         )}
 
         {/* ── FINAL CTA ──────────────────────────────────── */}
-        <section className="py-28 bg-white dark:bg-gray-950">
+        <section className="py-28 bg-gray-50 dark:bg-gray-950/60">
           <div className="max-w-7xl mx-auto px-6 sm:px-8">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl">
               <div aria-hidden className="absolute inset-0 bg-gradient-to-br from-blue-600 via-violet-700 to-indigo-800" />

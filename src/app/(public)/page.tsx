@@ -28,7 +28,18 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
+  // Core Profile
   const profile = await db.profile.findFirst();
+
+  // Homepage Projects
+  const latestProjects = (
+    await db.project.findMany({
+      where: { status: "PUBLISHED" },
+      orderBy: { createdAt: "desc" },
+      include: { images: true },
+      take: 4,
+    })
+  ).map((p) => ({ ...p, readingTime: readingTime(p.body) }));
 
   const featuredProjects = (
     await db.project.findMany({
@@ -39,27 +50,26 @@ export default async function HomePage() {
     })
   ).map((p) => ({ ...p, readingTime: readingTime(p.body) }));
 
-  // Map Prisma Experience → client Experience type (role ← title)
+  // Professional Information
   const experiences = profile
     ? (await db.experience.findMany({ where: { profileId: profile.id }, orderBy: { startDate: "desc" } })).map((exp) => ({
-        id: exp.id,
-        role: exp.title,          // Prisma field 'title' → client prop 'role'
-        company: exp.company,
-        startDate: exp.startDate,
-        endDate: exp.endDate,
-        description: exp.description,
-      }))
+      id: exp.id,
+      role: exp.title,
+      company: exp.company,
+      startDate: exp.startDate,
+      endDate: exp.endDate,
+      description: exp.description,
+    }))
     : [];
 
-  // Map Prisma Certification → client Certification type (name ← title, year ← date, url ← verificationUrl)
   const certifications = profile
     ? (await db.certification.findMany({ where: { profileId: profile.id } })).map((cert) => ({
-        id: cert.id,
-        name: cert.title,               // Prisma field 'title' → client prop 'name'
-        issuer: cert.issuer,
-        year: cert.date ? parseInt(cert.date.match(/\d{4}/)?.[0] ?? "0") : null, // extract year from date string
-        url: cert.verificationUrl,      // Prisma field 'verificationUrl' → client prop 'url'
-      }))
+      id: cert.id,
+      name: cert.title,
+      issuer: cert.issuer,
+      year: cert.date ? parseInt(cert.date.match(/\d{4}/)?.[0] ?? "0") : null,
+      url: cert.verificationUrl,
+    }))
     : [];
 
   if (!profile) {
@@ -77,6 +87,7 @@ export default async function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <HomeClient
         profile={profile}
+        latestProjects={latestProjects}
         featuredProjects={featuredProjects}
         experiences={experiences}
         certifications={certifications}
