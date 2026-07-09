@@ -11,6 +11,7 @@ import {
   Activity,
   ArrowUpRight,
   Clock,
+  Briefcase,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -20,6 +21,7 @@ type CommentRecord = {
 
 export default async function AdminDashboard() {
   const projectsCount = await db.project.count();
+  const servicesCount = await db.service.count();
   const pendingComments = await db.comment.count({ where: { status: "PENDING" } });
   const unreadInquiries = await db.inquiry.count({ where: { isRead: false } });
   const totalViews =
@@ -98,6 +100,16 @@ export default async function AdminDashboard() {
       accent: "from-violet-500/10 to-transparent dark:from-violet-500/5",
     },
     {
+      label: "Services",
+      value: String(servicesCount),
+      icon: <Briefcase className="w-5 h-5" />,
+      trend: "Active services",
+      trendUp: true,
+      iconBg: "bg-cyan-100 dark:bg-cyan-900/30",
+      iconColor: "text-cyan-600 dark:text-cyan-400",
+      accent: "from-cyan-500/10 to-transparent dark:from-cyan-500/5",
+    },
+    {
       label: "Pending Comments",
       value: String(pendingComments),
       icon: <MessageSquare className="w-5 h-5" />,
@@ -127,6 +139,14 @@ export default async function AdminDashboard() {
       bg: "bg-blue-50 dark:bg-blue-900/20",
       text: "text-blue-700 dark:text-blue-300",
       hover: "hover:bg-blue-100 dark:hover:bg-blue-900/40",
+    },
+    {
+      href: "/admin/services/new",
+      icon: <Briefcase className="w-4 h-4" />,
+      label: "New Service",
+      bg: "bg-cyan-50 dark:bg-cyan-900/20",
+      text: "text-cyan-700 dark:text-cyan-300",
+      hover: "hover:bg-cyan-100 dark:hover:bg-cyan-900/40",
     },
     {
       href: "/admin/comments",
@@ -181,18 +201,27 @@ export default async function AdminDashboard() {
               Here's a quick overview of your portfolio today.
             </p>
           </div>
-          <Link
-            href="/admin/projects/new"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white text-sm font-bold shadow-lg shadow-blue-500/25 transition-all hover:-translate-y-0.5 whitespace-nowrap"
-          >
-            <Plus className="w-4 h-4" />
-            New Project
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/admin/services/new"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white text-sm font-bold shadow-lg shadow-cyan-500/25 transition-all hover:-translate-y-0.5 whitespace-nowrap"
+            >
+              <Briefcase className="w-4 h-4" />
+              New Service
+            </Link>
+            <Link
+              href="/admin/projects/new"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white text-sm font-bold shadow-lg shadow-blue-500/25 transition-all hover:-translate-y-0.5 whitespace-nowrap"
+            >
+              <Plus className="w-4 h-4" />
+              New Project
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* ── Stat cards ──────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {statCards.map((card) => (
           <div
             key={card.label}

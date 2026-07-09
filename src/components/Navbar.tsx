@@ -27,8 +27,8 @@ export function Navbar() {
   return (
     <nav
       className={`sticky top-0 z-50 transition-all duration-300 ${scrolled
-          ? "backdrop-blur-2xl bg-white/70 dark:bg-gray-900/70 border-b border-white/10 dark:border-gray-800/60 shadow-lg shadow-blue-500/5"
-          : "bg-transparent border-transparent"
+        ? "backdrop-blur-2xl bg-white/70 dark:bg-gray-900/70 border-b border-white/10 dark:border-gray-800/60 shadow-lg shadow-blue-500/5"
+        : "bg-transparent border-transparent"
         }`}
     >
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -58,6 +58,12 @@ export function Navbar() {
           <Link href="/projects" className={linkClass("/projects")}>
             Projects
             {pathname === "/projects" && (
+              <span className="absolute left-1/2 -translate-x-1/2 bottom-0 h-0.5 w-3/4 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full shadow-[0_0_6px_rgba(99,102,241,0.5)] transition-all duration-300" />
+            )}
+          </Link>
+          <Link href="/services" className={linkClass("/services")}>
+            Services
+            {pathname === "/services" && (
               <span className="absolute left-1/2 -translate-x-1/2 bottom-0 h-0.5 w-3/4 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full shadow-[0_0_6px_rgba(99,102,241,0.5)] transition-all duration-300" />
             )}
           </Link>
@@ -127,8 +133,8 @@ export function Navbar() {
             href="/"
             onClick={() => setMobileMenuOpen(false)}
             className={`block px-3 py-2 rounded-xl text-sm font-medium transition-all ${pathname === "/"
-                ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+              : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
               }`}
           >
             Home
@@ -137,18 +143,28 @@ export function Navbar() {
             href="/projects"
             onClick={() => setMobileMenuOpen(false)}
             className={`block px-3 py-2 rounded-xl text-sm font-medium transition-all ${pathname === "/projects"
-                ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+              : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
               }`}
           >
             Projects
           </Link>
           <Link
+            href="/services"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`block px-3 py-2 rounded-xl text-sm font-medium transition-all ${pathname === "/services"
+              ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+              : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+          >
+            Services
+          </Link>
+          <Link
             href="/contact"
             onClick={() => setMobileMenuOpen(false)}
             className={`block px-3 py-2 rounded-xl text-sm font-medium transition-all ${pathname === "/contact"
-                ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+              : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
               }`}
           >
             Contact

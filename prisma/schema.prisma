@@ -145,3 +145,49 @@ model Admin {
   name         String?
   createdAt    DateTime @default(now())
 }
+
+model Service {
+  id           Int                @id @default(autoincrement())
+  title        String
+  slug         String             @unique
+  category     String
+  summary      String
+  description  String
+  icon         String
+  features     String
+  tools        String
+  benefits     String
+  process      String
+  pricing      String?
+  status       String             @default("PUBLISHED")
+  displayOrder Int                @default(0)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  inquiries    ServiceInquiry[]
+  testimonials ServiceTestimonial[]
+}
+
+model ServiceInquiry {
+  id        Int      @id @default(autoincrement())
+  serviceId Int
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  company   String?
+  message   String
+  budget    String?
+  timeline  String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model ServiceTestimonial {
+  id         Int      @id @default(autoincrement())
+  serviceId  Int
+  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  clientName String
+  company    String?
+  quote      String
+  rating     Int      @default(5)
+  createdAt  DateTime @default(now())
+}
