@@ -4,15 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { put } from "@vercel/blob";
 
-// Increase the body size limit to 10 MB (Vercel default is 4.5 MB)
-export const config = {
-    api: {
-        bodyParser: {
-            sizeLimit: '10mb',
-        },
-    },
-};
-
 export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session) {
