@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,6 +22,16 @@ import {
 
 type Project = Awaited<ReturnType<typeof getProjectDetail>>;
 
+// ── Focusable element selectors for focus trap ──
+const FOCUSABLE_SELECTORS = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
+
 // ── Inline GitHub icon ──
 function GithubIcon({ size = 16 }: { size?: number }) {
   return (
@@ -42,6 +52,7 @@ function GithubIcon({ size = 16 }: { size?: number }) {
 }
 
 // ── Premium Card wrapper ──
+// FIX: Added `min-w-0 overflow-hidden` to prevent text from blowing out the card width.
 function PremiumCard({
   children,
   className = "",
@@ -51,7 +62,7 @@ function PremiumCard({
 }) {
   return (
     <div
-      className={`rounded-2xl border border-gray-100 dark:border-gray-800 bg-white/60 dark:bg-gray-800/40 backdrop-blur-sm shadow-sm p-6 ${className}`}
+      className={`rounded-2xl border border-gray-100 dark:border-gray-800 bg-white/60 dark:bg-gray-800/40 backdrop-blur-sm shadow-sm p-5 sm:p-6 min-w-0 overflow-hidden ${className}`}
     >
       {children}
     </div>
@@ -59,17 +70,9 @@ function PremiumCard({
 }
 
 // ── Section label ──
-function SectionLabel({
-  color,
-  label,
-}: {
-  color: string;
-  label: string;
-}) {
+function SectionLabel({ color, label }: { color: string; label: string }) {
   return (
-    <p
-      className={`text-[11px] font-bold uppercase tracking-[0.12em] mb-3 ${color}`}
-    >
+    <p className={`text-[11px] font-bold uppercase tracking-[0.12em] mb-3 ${color}`}>
       {label}
     </p>
   );
@@ -83,25 +86,77 @@ export function ProjectModal({
   onClose: () => void;
 }) {
   const [project, setProject] = useState<Project | null>(null);
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "gallery" | "casestudy"
-  >("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "gallery" | "casestudy">("overview");
   const [galleryIdx, setGalleryIdx] = useState(0);
   const [imgLoaded, setImgLoaded] = useState(false);
 
+  // ────────────────────────────────────────────────────────────
+  // CHANGE 1 — Focus management refs
+  //   modalRef   → points at the modal <div> for focus-trap queries
+  //   triggerRef → stores the element that was focused *before* the
+  //                modal opened, so we can restore focus on close
+  // ────────────────────────────────────────────────────────────
+  const modalRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+
+  // ────────────────────────────────────────────────────────────
+  // CHANGE 2 — Capture the trigger element once on mount.
+  //   The cleanup function runs when the modal unmounts (closes),
+  //   restoring focus back to whatever button/link opened it.
+  // ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    triggerRef.current = document.activeElement as HTMLElement;
+    return () => {
+      triggerRef.current?.focus();
+    };
+  }, []);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft" && activeTab === "gallery") {
-        setGalleryIdx((prev) =>
-          project ? Math.max(0, prev - 1) : 0
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      // ──────────────────────────────────────────────────────
+      // CHANGE 3 — Focus trap on Tab / Shift+Tab.
+      //   We collect every focusable node inside the modal,
+      //   then redirect Tab at the last node back to the first,
+      //   and Shift+Tab at the first node back to the last.
+      // ──────────────────────────────────────────────────────
+      if (e.key === "Tab" && modalRef.current) {
+        const focusable = Array.from(
+          modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTORS)
         );
+
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          // Backwards tab from the first element → jump to last
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          // Forwards tab from the last element → jump to first
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+        return;
+      }
+
+      // Gallery keyboard navigation
+      if (e.key === "ArrowLeft" && activeTab === "gallery") {
+        setGalleryIdx((prev) => (project ? Math.max(0, prev - 1) : 0));
       }
       if (e.key === "ArrowRight" && activeTab === "gallery") {
         setGalleryIdx((prev) =>
-          project
-            ? Math.min((project.images.length || 1) - 1, prev + 1)
-            : 0
+          project ? Math.min((project.images.length || 1) - 1, prev + 1) : 0
         );
       }
     },
@@ -110,12 +165,27 @@ export function ProjectModal({
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
-    document.body.style.overflow = "hidden";
+
+    // ──────────────────────────────────────────────────────────
+    // CHANGE 4 — Use a CSS class instead of direct style mutation.
+    //   `.modal-open` in globals.css sets `overflow: hidden` AND
+    //   `scrollbar-gutter: stable` so the layout does not shift
+    //   when the scrollbar disappears. See globals.css for the rule.
+    // ──────────────────────────────────────────────────────────
+    document.body.classList.add("modal-open");
+
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
+      document.body.classList.remove("modal-open");
     };
   }, [handleKeyDown]);
+
+  // Move focus into the modal as soon as the project data arrives
+  useEffect(() => {
+    if (!project || !modalRef.current) return;
+    const firstFocusable = modalRef.current.querySelector<HTMLElement>(FOCUSABLE_SELECTORS);
+    firstFocusable?.focus();
+  }, [project]);
 
   useEffect(() => {
     getProjectDetail(slug).then(setProject);
@@ -124,7 +194,12 @@ export function ProjectModal({
   // ── Loading state ──
   if (!project) {
     const loadingOverlay = (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Loading project"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -151,27 +226,18 @@ export function ProjectModal({
   const readTime = readingTime(project.body);
   const mainImage = imageList[0];
   const hasCaseStudy =
-    project.problem ||
-    project.approach ||
-    project.result ||
-    project.metrics;
+    project.problem || project.approach || project.result || project.metrics;
 
   const tabs = [
     { id: "overview" as const, icon: <Layout size={14} />, label: "Overview" },
     {
       id: "gallery" as const,
       icon: <ImageIcon size={14} />,
-      label: `Gallery`,
+      label: "Gallery",
       count: imageList.length,
     },
     ...(hasCaseStudy
-      ? [
-        {
-          id: "casestudy" as const,
-          icon: <FileText size={14} />,
-          label: "Case Study",
-        },
-      ]
+      ? [{ id: "casestudy" as const, icon: <FileText size={14} />, label: "Case Study" }]
       : []),
   ];
 
@@ -183,52 +249,69 @@ export function ProjectModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.25 }}
+        // FIX: p-4 on mobile → breathing room from viewport edges
         className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-lg p-4 sm:p-6"
         onClick={onClose}
+        aria-hidden="true"
       >
-        {/* ── Close button floating outside the modal ── */}
+        {/* ── Close button ── */}
         <motion.button
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.2 }}
           onClick={onClose}
-          className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/40"
-          aria-label="Close"
+          className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+          aria-label="Close modal"
         >
           <X size={16} />
         </motion.button>
 
+        {/* ────────────────────────────────────────────────────────
+            CHANGE 5 — role="dialog" + aria-modal + aria-labelledby
+            on the *inner* container (the one users interact with),
+            not the backdrop. ref={modalRef} attaches our focus trap.
+        ──────────────────────────────────────────────────────── */}
         <motion.div
           key="modal"
+          ref={modalRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
           initial={{ opacity: 0, scale: 0.96, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 16 }}
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-3xl bg-gray-50 dark:bg-[#111318] border border-white/10 dark:border-gray-700/60 shadow-[0_32px_80px_-12px_rgba(0,0,0,0.5)] flex flex-col"
+          // FIX: `min-w-0` added to the modal root to stop flex children
+          // from ignoring their parent's width constraint on mobile.
+          className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-3xl bg-gray-50 dark:bg-[#111318] border border-white/10 dark:border-gray-700/60 shadow-[0_32px_80px_-12px_rgba(0,0,0,0.5)] flex flex-col min-w-0"
           onClick={(e) => e.stopPropagation()}
         >
           {/* ── Glassmorphism Header ── */}
-          <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200/60 dark:border-gray-700/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
+          {/* FIX: px-4 on mobile, px-6 on sm+ for tighter edge spacing */}
+          <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-b border-gray-200/60 dark:border-gray-700/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl flex items-center justify-between gap-3 min-w-0">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
               {/* Avatar */}
               <div className="relative flex-shrink-0">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-violet-600 flex items-center justify-center text-white font-black text-base shadow-md shadow-blue-500/30">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-violet-600 flex items-center justify-center text-white font-black text-base shadow-md shadow-blue-500/30">
                   {project.title.charAt(0)}
                 </div>
-                {/* Online indicator */}
                 <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white dark:border-gray-900" />
               </div>
 
-              <div className="min-w-0">
-                <h2 className="text-base font-bold text-gray-900 dark:text-white truncate leading-tight">
+              <div className="min-w-0 flex-1">
+                {/* id="modal-title" links to aria-labelledby on the dialog */}
+                <h2
+                  id="modal-title"
+                  className="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate leading-tight"
+                >
                   {project.title}
                 </h2>
-                <div className="flex items-center gap-3 text-xs text-gray-400 mt-0.5">
+                <div className="flex items-center gap-2 sm:gap-3 text-xs text-gray-400 mt-0.5">
                   <span className="flex items-center gap-1">
                     <Eye size={11} />
                     {project.viewCount.toLocaleString()}
                   </span>
-                  <span className="text-gray-300 dark:text-gray-600">·</span>
+                  <span className="text-gray-300 dark:text-gray-600" aria-hidden="true">·</span>
                   <span className="flex items-center gap-1">
                     <Clock size={11} />
                     {readTime} min
@@ -244,7 +327,7 @@ export function ProjectModal({
                   href={project.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all shadow-md shadow-blue-600/30 hover:shadow-blue-500/40 hover:scale-105"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all shadow-md shadow-blue-600/30 hover:shadow-blue-500/40 hover:scale-105 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none"
                 >
                   <ExternalLink size={12} />
                   Live Demo
@@ -255,7 +338,7 @@ export function ProjectModal({
                   href={project.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-semibold transition-all border border-gray-200 dark:border-gray-700 hover:scale-105"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-semibold transition-all border border-gray-200 dark:border-gray-700 hover:scale-105 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:outline-none"
                 >
                   <GithubIcon size={12} />
                   Source
@@ -265,13 +348,21 @@ export function ProjectModal({
           </div>
 
           {/* ── Pill Tab Bar ── */}
-          <div className="flex-shrink-0 px-6 py-3 border-b border-gray-200/60 dark:border-gray-700/50 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md">
+          <div
+            role="tablist"
+            aria-label="Project sections"
+            className="flex-shrink-0 px-4 sm:px-6 py-3 border-b border-gray-200/60 dark:border-gray-700/50 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md"
+          >
             <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/50">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  aria-controls={`tabpanel-${tab.id}`}
+                  id={`tab-${tab.id}`}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${activeTab === tab.id
+                  className={`relative flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${activeTab === tab.id
                       ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
                       : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                     }`}
@@ -294,21 +385,28 @@ export function ProjectModal({
           </div>
 
           {/* ── Tab Content ── */}
-          <div className="flex-1 overflow-y-auto overscroll-contain">
+          {/* FIX: `min-w-0` here ensures the scrollable area also respects
+              the flex container's width and doesn't overflow it. */}
+          <div className="flex-1 overflow-y-auto overscroll-contain min-w-0">
             <AnimatePresence mode="wait">
+
               {/* ─── Overview Tab ─── */}
               {activeTab === "overview" && (
                 <motion.div
                   key="overview"
+                  id="tabpanel-overview"
+                  role="tabpanel"
+                  aria-labelledby="tab-overview"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
-                  className="p-6 sm:p-8 space-y-5"
+                  // FIX: `min-w-0` + smaller padding on mobile (p-4 vs p-8)
+                  className="p-4 sm:p-6 lg:p-8 space-y-5 min-w-0"
                 >
-                  {/* Hero image with gradient overlay */}
+                  {/* Hero image */}
                   {mainImage && (
-                    <div className="relative h-52 sm:h-72 w-full rounded-2xl overflow-hidden bg-gray-900">
+                    <div className="relative h-48 sm:h-64 lg:h-72 w-full rounded-2xl overflow-hidden bg-gray-900">
                       <Image
                         src={mainImage.src}
                         alt={mainImage.alt || project.title}
@@ -318,10 +416,9 @@ export function ProjectModal({
                         onLoad={() => setImgLoaded(true)}
                         priority
                       />
-                      {/* Multi-stop gradient for depth */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                      {/* Tags floated over the image */}
-                      <div className="absolute bottom-4 left-4 flex flex-wrap gap-1.5">
+                      {/* FIX: `right-4` added so tags don't bleed off the right edge */}
+                      <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-1.5">
                         {project.techStack
                           .split(",")
                           .slice(0, 4)
@@ -344,21 +441,18 @@ export function ProjectModal({
 
                   {/* Summary card */}
                   <PremiumCard>
-                    <SectionLabel
-                      color="text-blue-500 dark:text-blue-400"
-                      label="About"
-                    />
-                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                    <SectionLabel color="text-blue-500 dark:text-blue-400" label="About" />
+                    {/* FIX: `break-words` forces long words/URLs onto the next line */}
+                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed break-words">
                       {project.summary}
                     </p>
                   </PremiumCard>
 
                   {/* Tech stack – full list */}
                   <PremiumCard>
-                    <SectionLabel
-                      color="text-violet-500 dark:text-violet-400"
-                      label="Tech Stack"
-                    />
+                    <SectionLabel color="text-violet-500 dark:text-violet-400" label="Tech Stack" />
+                    {/* FIX: `flex-wrap` was already here but `min-w-0` on PremiumCard
+                        now stops the tag container from pushing outside its bounds */}
                     <div className="flex flex-wrap gap-2">
                       {project.techStack.split(",").map((tech) => (
                         <span
@@ -373,15 +467,11 @@ export function ProjectModal({
 
                   {/* Description */}
                   <PremiumCard>
-                    <SectionLabel
-                      color="text-gray-400 dark:text-gray-500"
-                      label="Description"
-                    />
-                    <div className="prose prose-sm prose-gray dark:prose-invert max-w-none prose-headings:text-gray-900 dark:prose-headings:text-white prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-strong:text-gray-900 dark:prose-strong:text-white prose-code:bg-gray-100 dark:prose-code:bg-gray-700 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm">
-                      <ProjectImagesRenderer
-                        content={processedBody}
-                        images={imageList}
-                      />
+                    <SectionLabel color="text-gray-400 dark:text-gray-500" label="Description" />
+                    {/* FIX: `break-words overflow-hidden` on the prose wrapper
+                        prevents markdown content from overflowing its card */}
+                    <div className="prose prose-sm prose-gray dark:prose-invert max-w-none break-words overflow-hidden prose-headings:text-gray-900 dark:prose-headings:text-white prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-strong:text-gray-900 dark:prose-strong:text-white prose-code:bg-gray-100 dark:prose-code:bg-gray-700 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-pre:overflow-x-auto">
+                      <ProjectImagesRenderer content={processedBody} images={imageList} />
                     </div>
                   </PremiumCard>
 
@@ -392,7 +482,7 @@ export function ProjectModal({
                         href={project.liveUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold shadow-md shadow-blue-600/30 transition hover:bg-blue-500"
+                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold shadow-md shadow-blue-600/30 transition hover:bg-blue-500 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none"
                       >
                         <ExternalLink size={14} /> Live Demo
                       </a>
@@ -402,7 +492,7 @@ export function ProjectModal({
                         href={project.githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm font-semibold bg-white dark:bg-gray-800 transition hover:bg-gray-50"
+                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm font-semibold bg-white dark:bg-gray-800 transition hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:outline-none"
                       >
                         <GithubIcon size={14} /> Source
                       </a>
@@ -415,11 +505,14 @@ export function ProjectModal({
               {activeTab === "gallery" && (
                 <motion.div
                   key="gallery"
+                  id="tabpanel-gallery"
+                  role="tabpanel"
+                  aria-labelledby="tab-gallery"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
-                  className="p-6 sm:p-8"
+                  className="p-4 sm:p-6 lg:p-8"
                 >
                   {imageList.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-24 text-gray-400 gap-4">
@@ -430,7 +523,7 @@ export function ProjectModal({
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {/* Cinematic main viewer – near-black bg */}
+                      {/* Cinematic main viewer */}
                       <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-[#0a0a0b]">
                         <AnimatePresence mode="wait">
                           <motion.div
@@ -450,7 +543,6 @@ export function ProjectModal({
                           </motion.div>
                         </AnimatePresence>
 
-                        {/* Gradient wings for arrow context */}
                         {imageList.length > 1 && (
                           <>
                             <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-black/40 to-transparent pointer-events-none" />
@@ -461,7 +553,8 @@ export function ProjectModal({
                                 setGalleryIdx((prev) => Math.max(0, prev - 1))
                               }
                               disabled={galleryIdx === 0}
-                              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-md border border-white/10 text-white flex items-center justify-center transition-all hover:scale-110 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100"
+                              aria-label="Previous image"
+                              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-md border border-white/10 text-white flex items-center justify-center transition-all hover:scale-110 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
                             >
                               <ChevronLeft size={18} />
                             </button>
@@ -472,7 +565,8 @@ export function ProjectModal({
                                 )
                               }
                               disabled={galleryIdx === imageList.length - 1}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-md border border-white/10 text-white flex items-center justify-center transition-all hover:scale-110 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100"
+                              aria-label="Next image"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-md border border-white/10 text-white flex items-center justify-center transition-all hover:scale-110 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
                             >
                               <ChevronRight size={18} />
                             </button>
@@ -480,7 +574,11 @@ export function ProjectModal({
                         )}
 
                         {/* Counter badge */}
-                        <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold tracking-wide border border-white/10">
+                        <div
+                          aria-live="polite"
+                          aria-atomic="true"
+                          className="absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold tracking-wide border border-white/10"
+                        >
                           {galleryIdx + 1} / {imageList.length}
                         </div>
                       </div>
@@ -492,7 +590,9 @@ export function ProjectModal({
                             <button
                               key={idx}
                               onClick={() => setGalleryIdx(idx)}
-                              className={`relative w-20 h-14 rounded-xl overflow-hidden flex-shrink-0 transition-all duration-200 ${idx === galleryIdx
+                              aria-label={`View image ${idx + 1}${img.alt ? `: ${img.alt}` : ""}`}
+                              aria-pressed={idx === galleryIdx}
+                              className={`relative w-20 h-14 rounded-xl overflow-hidden flex-shrink-0 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none ${idx === galleryIdx
                                   ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-50 dark:ring-offset-[#111318] opacity-100 scale-100"
                                   : "opacity-50 hover:opacity-80 scale-95 hover:scale-100"
                                 }`}
@@ -508,7 +608,6 @@ export function ProjectModal({
                         </div>
                       )}
 
-                      {/* Active image caption */}
                       {imageList[galleryIdx].alt && (
                         <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
                           {imageList[galleryIdx].alt}
@@ -523,65 +622,54 @@ export function ProjectModal({
               {activeTab === "casestudy" && (
                 <motion.div
                   key="casestudy"
+                  id="tabpanel-casestudy"
+                  role="tabpanel"
+                  aria-labelledby="tab-casestudy"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
-                  className="p-6 sm:p-8"
+                  className="p-4 sm:p-6 lg:p-8"
                 >
-                  {/* 2-column grid layout */}
+                  {/* FIX: gap-4 grid is consistent — both rows use the same
+                      column grid so cards always align correctly on mobile */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Problem – red accent, full width on its own row for prominence */}
                     {project.problem && (
-                      <div className="sm:col-span-2">
+                      <div className="col-span-1 sm:col-span-2">
                         <PremiumCard className="border-red-100 dark:border-red-900/30 bg-red-50/60 dark:bg-red-950/20">
-                          <SectionLabel
-                            color="text-red-500 dark:text-red-400"
-                            label="Problem"
-                          />
-                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                          <SectionLabel color="text-red-500 dark:text-red-400" label="Problem" />
+                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed break-words">
                             {project.problem}
                           </p>
                         </PremiumCard>
                       </div>
                     )}
 
-                    {/* Approach – blue */}
                     {project.approach && (
                       <PremiumCard className="border-blue-100 dark:border-blue-900/30 bg-blue-50/60 dark:bg-blue-950/20">
-                        <SectionLabel
-                          color="text-blue-500 dark:text-blue-400"
-                          label="Approach"
-                        />
-                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                        <SectionLabel color="text-blue-500 dark:text-blue-400" label="Approach" />
+                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed break-words">
                           {project.approach}
                         </p>
                       </PremiumCard>
                     )}
 
-                    {/* Result – green */}
                     {project.result && (
                       <PremiumCard className="border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/60 dark:bg-emerald-950/20">
-                        <SectionLabel
-                          color="text-emerald-600 dark:text-emerald-400"
-                          label="Result"
-                        />
-                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                        <SectionLabel color="text-emerald-600 dark:text-emerald-400" label="Result" />
+                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed break-words">
                           {project.result}
                         </p>
                       </PremiumCard>
                     )}
 
-                    {/* Metrics – purple, full width for data density */}
                     {project.metrics && (
-                      <div className="sm:col-span-2">
+                      <div className="col-span-1 sm:col-span-2">
                         <PremiumCard className="border-violet-100 dark:border-violet-900/30 bg-violet-50/60 dark:bg-violet-950/20">
-                          <SectionLabel
-                            color="text-violet-500 dark:text-violet-400"
-                            label="Metrics"
-                          />
-                          {/* Parse metrics into a visual grid if they follow key: value format */}
+                          <SectionLabel color="text-violet-500 dark:text-violet-400" label="Metrics" />
                           {project.metrics.includes(":") ? (
+                            // FIX: `min-w-0` on each metric cell stops the grid
+                            // from overflowing when values are long strings
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                               {project.metrics
                                 .split("\n")
@@ -590,11 +678,11 @@ export function ProjectModal({
                                   const [key, ...rest] = line.split(":");
                                   const val = rest.join(":").trim();
                                   return (
-                                    <div key={i} className="space-y-1">
-                                      <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide">
+                                    <div key={i} className="space-y-1 min-w-0">
+                                      <p className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wide truncate">
                                         {key.trim()}
                                       </p>
-                                      <p className="text-lg font-bold text-gray-900 dark:text-white">
+                                      <p className="text-lg font-bold text-gray-900 dark:text-white break-words">
                                         {val}
                                       </p>
                                     </div>
@@ -602,7 +690,7 @@ export function ProjectModal({
                                 })}
                             </div>
                           ) : (
-                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line break-words">
                               {project.metrics}
                             </p>
                           )}
