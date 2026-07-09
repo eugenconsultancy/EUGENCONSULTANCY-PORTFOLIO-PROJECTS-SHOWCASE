@@ -1,6 +1,5 @@
 import { Mail, ArrowRight, Code2 } from "lucide-react";
 
-// Inline SVG components for brand icons (lucide-react does not export these)
 function GithubIcon() {
   return (
     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -34,7 +33,7 @@ const navLinks = {
     { label: "Contact", href: "/contact" },
   ],
   Services: [
-    { label: "Our Services", href: "/projects" },   // now points to projects
+    { label: "Our Services", href: "/services" },
   ],
 };
 
@@ -58,50 +57,48 @@ export function Footer() {
           backgroundSize: "40px 40px",
         }}
       />
-      {/* Glow blob */}
       <div
         aria-hidden
         className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-3xl -z-10"
       />
 
-      {/* ── Availability CTA banner – made compact ── */}
+      {/* Availability CTA banner */}
       <div className="border-b border-gray-100 dark:border-gray-800/80">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-1">
+            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-0.5">
               Currently Available
             </p>
-            <h2 className="text-lg sm:text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+            <h2 className="text-sm sm:text-lg font-extrabold text-gray-900 dark:text-white tracking-tight">
               Available for Consultancy & Freelance Projects
             </h2>
           </div>
           <a
             href="/contact"
-            className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+            className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
           >
             Schedule Consultation
-            <ArrowRight size={15} />
+            <ArrowRight size={14} />
           </a>
         </div>
       </div>
 
-      {/* ── Main footer body – compact ── */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand column */}
-          <div className="lg:col-span-1">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-blue-500/30 text-sm tracking-tight">
+      {/* Main footer body - FIXED: 2 columns on mobile instead of stacked */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+          {/* Brand column - spans full width on mobile */}
+          <div className="col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-blue-500/30 text-xs sm:text-sm tracking-tight">
                 EC
               </div>
-              <span className="text-base font-extrabold tracking-tight text-gray-900 dark:text-white uppercase">
+              <span className="text-sm sm:text-base font-extrabold tracking-tight text-gray-900 dark:text-white uppercase">
                 EugenConsultancy
               </span>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-5">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-4">
               Full‑Stack Developer · Data Analyst · Embedded Systems. Turning complex requirements into revenue‑generating tools.
             </p>
-            {/* Social links */}
             <div className="flex gap-2">
               {socials.map((s) => (
                 <a
@@ -110,7 +107,7 @@ export function Footer() {
                   aria-label={s.label}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-gray-50 dark:bg-gray-800/60 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all duration-200"
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-gray-200 dark:border-gray-700/80 bg-gray-50 dark:bg-gray-800/60 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all duration-200"
                 >
                   {s.icon}
                 </a>
@@ -121,15 +118,15 @@ export function Footer() {
           {/* Nav columns */}
           {Object.entries(navLinks).map(([heading, links]) => (
             <div key={heading}>
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">
+              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">
                 {heading}
               </p>
-              <ul className="space-y-2">
+              <ul className="space-y-1.5 sm:space-y-2">
                 {links.map((link) => (
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                     >
                       {link.label}
                     </a>
@@ -139,31 +136,31 @@ export function Footer() {
             </div>
           ))}
 
-          {/* Contact column – updated with real email & phone */}
+          {/* Contact column */}
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">
+            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">
               Contact
             </p>
-            <ul className="space-y-2.5">
+            <ul className="space-y-2">
               <li>
-                <p className="text-xs text-gray-400 dark:text-gray-600 mb-0.5">Email</p>
+                <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-600 mb-0.5">Email</p>
                 <a
                   href="mailto:eugenbku@gmail.com"
-                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors break-all"
                 >
                   eugenbku@gmail.com
                 </a>
               </li>
               <li>
-                <p className="text-xs text-gray-400 dark:text-gray-600 mb-0.5">Phone</p>
-                <p className="text-sm text-gray-700 dark:text-gray-300">+254 108 038 898</p>
+                <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-600 mb-0.5">Phone</p>
+                <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">+254 108 038 898</p>
               </li>
               <li>
-                <p className="text-xs text-gray-400 dark:text-gray-600 mb-0.5">Location</p>
-                <p className="text-sm text-gray-700 dark:text-gray-300">Nairobi, Kenya</p>
+                <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-600 mb-0.5">Location</p>
+                <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">Nairobi, Kenya</p>
               </li>
               <li className="pt-1">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-950/50 border border-green-200 dark:border-green-900 text-green-700 dark:text-green-400 text-xs font-medium">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 dark:bg-green-950/50 border border-green-200 dark:border-green-900 text-green-700 dark:text-green-400 text-[10px] sm:text-xs font-medium">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                   Available for hire
                 </span>
@@ -173,25 +170,22 @@ export function Footer() {
         </div>
       </div>
 
-      {/* ── Tech stack + copyright strip – slimmed down ── */}
+      {/* Tech stack + copyright strip */}
       <div className="border-t border-gray-100 dark:border-gray-800/80">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          {/* Tech badges */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <Code2 size={13} className="text-gray-400 dark:text-gray-600 flex-shrink-0" />
-            <span className="text-xs text-gray-400 dark:text-gray-600 mr-1">Built with</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 flex-wrap justify-center sm:justify-start">
+            <Code2 size={12} className="text-gray-400 dark:text-gray-600 flex-shrink-0" />
+            <span className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-600 mr-1">Built with</span>
             {techStack.map((tech) => (
               <span
                 key={tech}
-                className="inline-block px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs font-medium border border-gray-200 dark:border-gray-700"
+                className="inline-block px-1.5 sm:px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-[10px] sm:text-xs font-medium border border-gray-200 dark:border-gray-700"
               >
                 {tech}
               </span>
             ))}
           </div>
-
-          {/* Copyright */}
-          <p className="text-xs text-gray-400 dark:text-gray-600 whitespace-nowrap">
+          <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-600 whitespace-nowrap">
             &copy; {new Date().getFullYear()} EugenConsultancy. All rights reserved.
           </p>
         </div>
