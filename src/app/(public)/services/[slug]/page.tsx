@@ -452,7 +452,7 @@ function PricingCard({
 }
 
 // ─── Main client component ─────────────────────────────────────────────────────
-export function ServicePageClient({
+export default function ServicePageClient({
     service,
     features,
     benefits,
