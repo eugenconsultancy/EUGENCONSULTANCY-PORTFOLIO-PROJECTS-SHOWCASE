@@ -27,6 +27,11 @@ export default async function ServiceDetailPage({ params }: Props) {
 
   if (!service) notFound();
 
+  // Safe JSON parse
+  const safeParse = (str: string, fallback: any = []) => {
+    try { return JSON.parse(str); } catch { return fallback; }
+  };
+
   const serviceMeta = {
     id: service.id,
     slug: service.slug,
@@ -36,10 +41,15 @@ export default async function ServiceDetailPage({ params }: Props) {
     icon: service.icon,
   };
 
-  const features = JSON.parse(service.features);
-  const benefits = JSON.parse(service.benefits);
-  const process = JSON.parse(service.process);
-  const pricing = service.pricing ? JSON.parse(service.pricing) : [];
+  const features = safeParse(service.features, []);
+  const benefitsRaw = safeParse(service.benefits, []);
+  const process = safeParse(service.process, []);
+  const pricing = service.pricing ? safeParse(service.pricing, []) : [];
+
+  // Ensure benefits is array of { title, items } - if flat strings, convert
+  const benefits = Array.isArray(benefitsRaw) && benefitsRaw.length > 0 && typeof benefitsRaw[0] === "string"
+    ? [{ title: "Key Benefits", items: benefitsRaw }]
+    : benefitsRaw;
 
   const testimonials = service.testimonials.map((t) => ({
     quote: t.quote,
