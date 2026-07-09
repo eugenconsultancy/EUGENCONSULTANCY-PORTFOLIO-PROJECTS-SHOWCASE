@@ -22,7 +22,11 @@ export async function POST(req: NextRequest) {
     const uploadedImages = [];
 
     for (const file of files) {
-        const blob = await put(file.name, file, { access: "public" });
+        // ✅ Prevent overwrite conflicts by generating a unique pathname
+        const blob = await put(file.name, file, {
+            access: "public",
+            addRandomSuffix: true, // Appends a random string to the filename
+        });
 
         let imgProjectId: number | null = null;
         if (projectId) {
@@ -32,7 +36,7 @@ export async function POST(req: NextRequest) {
         const image = await db.projectImage.create({
             data: {
                 projectId: imgProjectId,
-                filename: blob.url,
+                filename: blob.url, // Stores the full public URL
                 alt: alt || file.name,
             },
         });
