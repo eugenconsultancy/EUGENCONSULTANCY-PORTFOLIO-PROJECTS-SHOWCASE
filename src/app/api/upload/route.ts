@@ -11,34 +11,38 @@ export async function POST(req: NextRequest) {
     }
 
     const formData = await req.formData();
-    const file = formData.get("file") as File | null;
+    const files = formData.getAll("files") as File[];
     const projectId = formData.get("projectId") as string | null;
     const alt = (formData.get("alt") as string) || "";
 
-    if (!file) {
-        return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    if (files.length === 0) {
+        return NextResponse.json({ error: "No files provided" }, { status: 400 });
     }
 
-    // Upload to Vercel Blob – 'access: public' makes the image directly viewable
-    const blob = await put(file.name, file, { access: "public" });
+    const uploadedImages = [];
 
-    // If a projectId was passed, associate the image with the project
-    let imgProjectId: number | null = null;
-    if (projectId) {
-        imgProjectId = parseInt(projectId, 10);
+    for (const file of files) {
+        const blob = await put(file.name, file, { access: "public" });
+
+        let imgProjectId: number | null = null;
+        if (projectId) {
+            imgProjectId = parseInt(projectId, 10);
+        }
+
+        const image = await db.projectImage.create({
+            data: {
+                projectId: imgProjectId,
+                filename: blob.url,
+                alt: alt || file.name,
+            },
+        });
+
+        uploadedImages.push({
+            id: image.id,
+            filename: blob.url,
+            url: blob.url,
+        });
     }
 
-    const image = await db.projectImage.create({
-        data: {
-            projectId: imgProjectId,
-            filename: blob.url,   // store the full URL, not just the filename
-            alt: alt || file.name,
-        },
-    });
-
-    return NextResponse.json({
-        id: image.id,
-        filename: blob.url,
-        url: blob.url,
-    });
+    return NextResponse.json(uploadedImages);
 }
