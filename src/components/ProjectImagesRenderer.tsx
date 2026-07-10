@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import rehypeSlug from "rehype-slug";
+import rehypeRaw from "rehype-raw"; // ✅ Enables raw HTML in markdown
 import { Lightbox } from "./Lightbox";
 import { ZoomIn } from "lucide-react";
 import { CodeModal } from "./CodeModal";
@@ -103,14 +104,8 @@ export function ProjectImagesRenderer({
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[
             rehypeHighlight,
-            [
-              rehypeSlug,
-              {
-                // Ensures heading IDs are generated consistently
-                // This matches the slugify logic used in TableOfContents
-                prefix: "",
-              },
-            ],
+            rehypeSlug,   // adds IDs to headings
+            rehypeRaw,    // ✅ renders raw HTML (like <div style="...">)
           ]}
           components={{
             code: CodeRenderer,
