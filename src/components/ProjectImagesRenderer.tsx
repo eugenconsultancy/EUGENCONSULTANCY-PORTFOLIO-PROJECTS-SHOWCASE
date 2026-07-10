@@ -15,6 +15,12 @@ type ImageInfo = {
   alt: string;
 };
 
+type CodeRendererProps = {
+  className?: string;
+  children?: React.ReactNode;
+  inline?: boolean;
+};
+
 export function ProjectImagesRenderer({
   content,
   images,
@@ -38,21 +44,19 @@ export function ProjectImagesRenderer({
       prev !== null ? Math.min(images.length - 1, prev + 1) : null
     );
 
-  const CodeRenderer: React.FC<{
-    className?: string;
-    children?: React.ReactNode;
-    inline?: boolean;
-  }> = ({ className, children, inline, ...props }) => {
+  // ── Code block renderer with expandable modal ──
+  const CodeRenderer = ({ className, children, inline, ...props }: CodeRendererProps) => {
     const match = /language-(\w+)/.exec(className || "");
     const language = match ? match[1] : undefined;
     const codeString = String(children).replace(/\n$/, "");
 
     if (!inline && language) {
       return (
-        <div className="relative group cursor-pointer">
+        <div className="relative group">
           <button
             onClick={() => setCodeModal({ code: codeString, language })}
-            className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300"
+            className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
+            aria-label="Expand code"
           >
             Expand
           </button>
@@ -70,7 +74,7 @@ export function ProjectImagesRenderer({
     );
   };
 
-  // Inline image renderer (replaces <img> inside Markdown)
+  // ── Inline image renderer with lightbox trigger ──
   const ImageRenderer = ({ src, alt }: { src?: string; alt?: string }) => {
     if (!src) return null;
     return (
@@ -80,9 +84,10 @@ export function ProjectImagesRenderer({
           alt={alt || ""}
           width={800}
           height={450}
-          className="cursor-zoom-in rounded-lg hover:opacity-90 transition"
+          className="cursor-zoom-in rounded-lg hover:opacity-90 transition-opacity"
           style={{ maxWidth: "100%", height: "auto" }}
           onClick={() => openLightbox(src)}
+          priority={false}
         />
       </span>
     );
@@ -92,10 +97,21 @@ export function ProjectImagesRenderer({
 
   return (
     <>
+      {/* ── Markdown content ── */}
       <div className="prose prose-lg dark:prose-invert max-w-none">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeHighlight, rehypeSlug]}
+          rehypePlugins={[
+            rehypeHighlight,
+            [
+              rehypeSlug,
+              {
+                // Ensures heading IDs are generated consistently
+                // This matches the slugify logic used in TableOfContents
+                prefix: "",
+              },
+            ],
+          ]}
           components={{
             code: CodeRenderer,
             img: ImageRenderer,
@@ -105,8 +121,9 @@ export function ProjectImagesRenderer({
         </ReactMarkdown>
       </div>
 
+      {/* ── Gallery section ── */}
       {showGallery && (
-        <div className="mt-10">
+        <div className="mt-12">
           <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
             Project Gallery
           </h3>
@@ -114,23 +131,34 @@ export function ProjectImagesRenderer({
             {images.map((img, idx) => (
               <div
                 key={idx}
-                className="group relative rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-xl transition-all duration-300 h-64"
+                className="group relative rounded-2xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-xl transition-all duration-300 h-64 cursor-pointer"
                 onClick={() => {
                   const foundIdx = images.findIndex((i) => i.src === img.src);
                   if (foundIdx !== -1) setLightboxIndex(foundIdx);
                 }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    const foundIdx = images.findIndex((i) => i.src === img.src);
+                    if (foundIdx !== -1) setLightboxIndex(foundIdx);
+                  }
+                }}
+                aria-label={`View ${img.alt || `image ${idx + 1}`} in lightbox`}
               >
                 <Image
                   src={img.src}
-                  alt={img.alt}
+                  alt={img.alt || `Gallery image ${idx + 1}`}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <ZoomIn className="w-10 h-10 text-white" />
+                  <ZoomIn className="w-10 h-10 text-white drop-shadow-lg" />
                 </div>
                 {img.alt && (
-                  <div className="absolute bottom-0 left-0 right-0 p-3 text-sm text-white bg-gradient-to-t from-black/60 to-transparent">
+                  <div className="absolute bottom-0 left-0 right-0 p-3 text-sm text-white bg-gradient-to-t from-black/70 to-transparent">
                     {img.alt}
                   </div>
                 )}
@@ -140,6 +168,7 @@ export function ProjectImagesRenderer({
         </div>
       )}
 
+      {/* ── Lightbox ── */}
       {lightboxIndex !== null && (
         <Lightbox
           images={images}
@@ -150,6 +179,7 @@ export function ProjectImagesRenderer({
         />
       )}
 
+      {/* ── Code modal ── */}
       {codeModal && (
         <CodeModal
           code={codeModal.code}
