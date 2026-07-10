@@ -1,17 +1,18 @@
+// src/app/admin/services/[id]/edit/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 
-export default function EditServicePage() {
+export default function EditServicePage({ params }: { params: { id: string } }) {
     const router = useRouter();
-    const params = useParams();
-    const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [deleting, setDeleting] = useState(false);
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [removeImage, setRemoveImage] = useState(false);
 
     const [formData, setFormData] = useState({
         title: "",
@@ -28,37 +29,39 @@ export default function EditServicePage() {
         status: "DRAFT",
         displayOrder: "0",
     });
+    const [existingImage, setExistingImage] = useState<string | null>(null);
 
+    // Fetch existing service data
     useEffect(() => {
+        async function fetchService() {
+            try {
+                const res = await fetch(`/api/admin/services/${params.id}`);
+                if (!res.ok) throw new Error("Failed to fetch service");
+                const data = await res.json();
+                setFormData({
+                    title: data.title || "",
+                    slug: data.slug || "",
+                    category: data.category || "Data Analytics",
+                    summary: data.summary || "",
+                    description: data.description || "",
+                    icon: data.icon || "📊",
+                    features: data.features || "[]",
+                    tools: data.tools || "[]",
+                    benefits: data.benefits || "[]",
+                    process: data.process || "[]",
+                    pricing: data.pricing || "",
+                    status: data.status || "DRAFT",
+                    displayOrder: String(data.displayOrder || 0),
+                });
+                setExistingImage(data.image || null);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : "Failed to load service");
+            } finally {
+                setLoading(false);
+            }
+        }
         fetchService();
     }, [params.id]);
-
-    const fetchService = async () => {
-        try {
-            const res = await fetch(`/api/admin/services/${params.id}`);
-            if (!res.ok) throw new Error("Failed to fetch service");
-            const service = await res.json();
-            setFormData({
-                title: service.title || "",
-                slug: service.slug || "",
-                category: service.category || "Data Analytics",
-                summary: service.summary || "",
-                description: service.description || "",
-                icon: service.icon || "📊",
-                features: service.features || "[]",
-                tools: service.tools || "[]",
-                benefits: service.benefits || "[]",
-                process: service.process || "[]",
-                pricing: service.pricing || "",
-                status: service.status || "DRAFT",
-                displayOrder: String(service.displayOrder || 0),
-            });
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to load service");
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -69,28 +72,44 @@ export default function EditServicePage() {
         }
     };
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setSelectedImage(e.target.files[0]);
+            setRemoveImage(false); // If they choose a new file, don't remove the old one
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
         setError("");
 
         try {
-            // Parse displayOrder as integer before sending
-            const data = {
-                ...formData,
-                displayOrder: parseInt(formData.displayOrder) || 0,
-                pricing: formData.pricing || null,
-            };
+            const form = new FormData();
+            // Append all form fields
+            Object.entries(formData).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    form.append(key, value);
+                }
+            });
+            // Append image if selected
+            if (selectedImage) {
+                form.append("image", selectedImage);
+            }
+            // Append removeImage flag if checked
+            if (removeImage) {
+                form.append("removeImage", "true");
+            }
 
             const res = await fetch(`/api/admin/services/${params.id}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
+                // ✅ DO NOT set Content-Type – browser will use multipart/form-data with boundary
+                body: form,
             });
 
             if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(errData.error || "Failed to update service");
+                const errorData = await res.json();
+                throw new Error(errorData.error || "Failed to update service");
             }
 
             router.push("/admin/services");
@@ -102,27 +121,8 @@ export default function EditServicePage() {
         }
     };
 
-    const handleDelete = async () => {
-        if (!confirm("Are you sure you want to delete this service?")) return;
-        setDeleting(true);
-        try {
-            const res = await fetch(`/api/admin/services/${params.id}`, { method: "DELETE" });
-            if (!res.ok) throw new Error("Failed to delete service");
-            router.push("/admin/services");
-            router.refresh();
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to delete service");
-        } finally {
-            setDeleting(false);
-        }
-    };
-
     if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-            </div>
-        );
+        return <div className="text-center py-20 text-gray-500">Loading service...</div>;
     }
 
     return (
@@ -134,48 +134,112 @@ export default function EditServicePage() {
                     </Link>
                     <div>
                         <h1 className="text-2xl font-black text-gray-900 dark:text-white">Edit Service</h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{formData.title}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Update service details</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button onClick={handleDelete} disabled={deleting}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 text-sm font-bold hover:bg-red-50 dark:hover:bg-red-950/30 transition-all disabled:opacity-50">
-                        <Trash2 className="w-4 h-4" />{deleting ? "Deleting..." : "Delete"}
-                    </button>
-                    <button type="submit" form="service-form" disabled={saving}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 text-white text-sm font-bold shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50">
-                        <Save className="w-4 h-4" />{saving ? "Saving..." : "Update Service"}
-                    </button>
-                </div>
+                <button type="submit" form="service-form" disabled={saving}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 text-white text-sm font-bold shadow-lg shadow-blue-500/25 hover:-translate-y-0.5 transition-all disabled:opacity-50">
+                    <Save className="w-4 h-4" />{saving ? "Saving..." : "Update Service"}
+                </button>
             </div>
 
             {error && (
-                <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-red-600 text-sm">{error}</div>
+                <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400 text-sm">
+                    {error}
+                </div>
             )}
 
-            <form id="service-form" onSubmit={handleSubmit} className="space-y-6">
+            <form id="service-form" onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data">
+                {/* Basic Information */}
                 <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 space-y-4">
                     <h2 className="text-lg font-black text-gray-900 dark:text-white">Basic Information</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><label className="block text-sm font-bold mb-1.5">Title *</label><input type="text" name="title" value={formData.title} onChange={handleChange} required className="w-full px-4 py-2.5 rounded-xl border" /></div>
-                        <div><label className="block text-sm font-bold mb-1.5">Slug *</label><input type="text" name="slug" value={formData.slug} onChange={handleChange} required className="w-full px-4 py-2.5 rounded-xl border" /></div>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Title *</label>
+                            <input type="text" name="title" value={formData.title} onChange={handleChange} required className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Slug *</label>
+                            <input type="text" name="slug" value={formData.slug} onChange={handleChange} required className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-4">
-                        <div><label className="block text-sm font-bold mb-1.5">Category</label><select name="category" value={formData.category} onChange={handleChange} className="w-full px-4 py-2.5 rounded-xl border"><option>Data Analytics</option><option>SEO</option><option>Security</option><option>Content</option></select></div>
-                        <div><label className="block text-sm font-bold mb-1.5">Icon</label><input type="text" name="icon" value={formData.icon} onChange={handleChange} className="w-full px-4 py-2.5 rounded-xl border" /></div>
-                        <div><label className="block text-sm font-bold mb-1.5">Status</label><select name="status" value={formData.status} onChange={handleChange} className="w-full px-4 py-2.5 rounded-xl border"><option value="DRAFT">Draft</option><option value="PUBLISHED">Published</option></select></div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Category</label>
+                            <select name="category" value={formData.category} onChange={handleChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="Data Analytics">Data Analytics</option>
+                                <option value="SEO">SEO</option>
+                                <option value="Security">Security</option>
+                                <option value="Content">Content</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Icon (Emoji)</label>
+                            <input type="text" name="icon" value={formData.icon} onChange={handleChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
+                            <select name="status" value={formData.status} onChange={handleChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="DRAFT">Draft</option>
+                                <option value="PUBLISHED">Published</option>
+                            </select>
+                        </div>
                     </div>
-                    <div><label className="block text-sm font-bold mb-1.5">Summary *</label><textarea name="summary" value={formData.summary} onChange={handleChange} required rows={2} className="w-full px-4 py-2.5 rounded-xl border resize-none" /></div>
-                    <div><label className="block text-sm font-bold mb-1.5">Full Description *</label><textarea name="description" value={formData.description} onChange={handleChange} required rows={6} className="w-full px-4 py-2.5 rounded-xl border" /></div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Summary *</label>
+                        <textarea name="summary" value={formData.summary} onChange={handleChange} required rows={2} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Full Description *</label>
+                        <textarea name="description" value={formData.description} onChange={handleChange} required rows={6} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    </div>
+
+                    {/* Image upload section */}
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Service Image</label>
+                        {existingImage && !removeImage && (
+                            <div className="mb-3 flex items-center gap-3">
+                                <img src={existingImage} alt="Current" className="h-16 w-auto rounded-lg object-cover border border-gray-200 dark:border-gray-700" />
+                                <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                    <input type="checkbox" checked={removeImage} onChange={() => setRemoveImage(!removeImage)} />
+                                    Remove current image
+                                </label>
+                            </div>
+                        )}
+                        <input
+                            type="file"
+                            name="image"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300"
+                        />
+                        {selectedImage && (
+                            <p className="mt-2 text-xs text-green-600 dark:text-green-400">Selected: {selectedImage.name}</p>
+                        )}
+                    </div>
                 </div>
+
+                {/* JSON fields – same as new page */}
                 <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 space-y-4">
-                    <h2 className="text-lg font-black">JSON Fields</h2>
-                    <div><label className="block text-sm font-bold mb-1.5">Features</label><textarea name="features" value={formData.features} onChange={handleChange} rows={4} className="w-full px-4 py-2.5 rounded-xl border font-mono text-sm" /></div>
-                    <div><label className="block text-sm font-bold mb-1.5">Tools</label><textarea name="tools" value={formData.tools} onChange={handleChange} rows={4} className="w-full px-4 py-2.5 rounded-xl border font-mono text-sm" /></div>
-                    <div><label className="block text-sm font-bold mb-1.5">Benefits</label><textarea name="benefits" value={formData.benefits} onChange={handleChange} rows={4} className="w-full px-4 py-2.5 rounded-xl border font-mono text-sm" /></div>
-                    <div><label className="block text-sm font-bold mb-1.5">Process</label><textarea name="process" value={formData.process} onChange={handleChange} rows={6} className="w-full px-4 py-2.5 rounded-xl border font-mono text-sm" /></div>
-                    <div><label className="block text-sm font-bold mb-1.5">Pricing</label><textarea name="pricing" value={formData.pricing} onChange={handleChange} rows={4} className="w-full px-4 py-2.5 rounded-xl border font-mono text-sm" /></div>
-                    <div><label className="block text-sm font-bold mb-1.5">Display Order</label><input type="number" name="displayOrder" value={formData.displayOrder} onChange={handleChange} className="w-full px-4 py-2.5 rounded-xl border" /></div>
+                    <h2 className="text-lg font-black text-gray-900 dark:text-white">Features, Tools & Benefits (JSON format)</h2>
+                    {["features", "tools", "benefits"].map((field) => (
+                        <div key={field}>
+                            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5 capitalize">{field} (JSON array)</label>
+                            <textarea name={field} value={(formData as any)[field]} onChange={handleChange} rows={4} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder='["Item 1", "Item 2"]' />
+                        </div>
+                    ))}
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Process (JSON array of steps)</label>
+                        <textarea name="process" value={formData.process} onChange={handleChange} rows={6} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder='[{"step": "Step 1", "description": "Description"}]' />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Pricing (JSON object, optional)</label>
+                        <textarea name="pricing" value={formData.pricing} onChange={handleChange} rows={4} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder='{"basic": {"name": "Basic", "price": "$100", "features": ["Feature 1"]}}' />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Display Order</label>
+                        <input type="number" name="displayOrder" value={formData.displayOrder} onChange={handleChange} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    </div>
                 </div>
             </form>
         </div>
