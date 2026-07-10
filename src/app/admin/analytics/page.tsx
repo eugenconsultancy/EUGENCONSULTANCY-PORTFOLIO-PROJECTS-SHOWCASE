@@ -38,8 +38,6 @@ function getPreviousPeriod(start: Date, end: Date): { start: Date; end: Date } {
   };
 }
 
-type GroupedView = { createdAt: Date; _count: number };
-
 // ── page component ─────────────────────────────────────────────
 export default async function AnalyticsPage({
   searchParams,
@@ -121,7 +119,7 @@ export default async function AnalyticsPage({
 
   const projectViewsData = await Promise.all(
     topProjects.map(async (p) => {
-      const views: GroupedView[] = await db.projectView.groupBy({
+      const views = await db.projectView.groupBy({
         by: ["createdAt"],
         where: {
           projectId: p.id,
@@ -130,10 +128,10 @@ export default async function AnalyticsPage({
         _count: true,
       });
       const monthly: Record<string, number> = {};
-      views.forEach((v: GroupedView) => {
+      views.forEach((v) => {
         const d = new Date(v.createdAt);
         const key = monthNames[d.getMonth()] + " " + d.getFullYear().toString().slice(-2);
-        monthly[key] = (monthly[key] || 0) + v._count;
+        monthly[key] = (monthly[key] || 0) + v._count._all;
       });
       return { title: p.title, data: monthlyClicks.map((m) => ({ month: m.month, views: monthly[m.month] || 0 })) };
     })
