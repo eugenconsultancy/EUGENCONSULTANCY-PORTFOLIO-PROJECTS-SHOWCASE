@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { saveServiceImage, deleteServiceImage } from "@/lib/upload";
 
 export async function GET(
   request: Request,
@@ -33,8 +34,7 @@ export async function GET(
     return NextResponse.json(service);
   } catch (error) {
     console.error("GET /api/admin/services/[id] Error:", error);
-    const message = error instanceof Error ? error.message : "Failed to fetch service";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch service" }, { status: 500 });
   }
 }
 
@@ -53,63 +53,77 @@ export async function PUT(
       return NextResponse.json({ error: "Invalid service ID" }, { status: 400 });
     }
 
-    const body = await request.json();
-
-    // Log update request
-    console.log("PUT /api/admin/services/[id] - Updating service:", {
-      id: serviceId,
-      title: body.title,
-      slug: body.slug,
-      status: body.status,
-    });
-
-    // Check if service exists
     const existing = await db.service.findUnique({ where: { id: serviceId } });
     if (!existing) {
       return NextResponse.json({ error: "Service not found" }, { status: 404 });
     }
 
-    // Ensure JSON fields are strings
-    const features = typeof body.features === "string" ? body.features : JSON.stringify(body.features || []);
-    const tools = typeof body.tools === "string" ? body.tools : JSON.stringify(body.tools || []);
-    const benefits = typeof body.benefits === "string" ? body.benefits : JSON.stringify(body.benefits || []);
-    const process = typeof body.process === "string" ? body.process : JSON.stringify(body.process || []);
-    const pricing = body.pricing
-      ? typeof body.pricing === "string"
-        ? body.pricing
-        : JSON.stringify(body.pricing)
-      : null;
+    // ✅ Parse multipart form data
+    const formData = await request.formData();
 
+    // Extract text fields
+    const title = formData.get("title") as string;
+    const slug = formData.get("slug") as string;
+    const category = formData.get("category") as string;
+    const summary = formData.get("summary") as string;
+    const description = formData.get("description") as string;
+    const icon = formData.get("icon") as string;
+    const features = formData.get("features") as string;
+    const tools = formData.get("tools") as string;
+    const benefits = formData.get("benefits") as string;
+    const process = formData.get("process") as string;
+    const pricing = formData.get("pricing") as string | null;
+    const status = (formData.get("status") as string) || existing.status;
+    const displayOrder = parseInt((formData.get("displayOrder") as string) || String(existing.displayOrder), 10);
+    const removeImage = formData.get("removeImage") === "true";
+
+    // ✅ Handle image file
+    const imageFile = formData.get("image") as File | null;
+    let imageUrl: string | null = existing.image;
+
+    // If user explicitly wants to remove the image
+    if (removeImage && existing.image) {
+      await deleteServiceImage(existing.image);
+      imageUrl = null;
+    }
+
+    // If a new image is uploaded, replace the old one
+    if (imageFile && imageFile.size > 0) {
+      // Delete old image if exists
+      if (existing.image) {
+        await deleteServiceImage(existing.image);
+      }
+      imageUrl = await saveServiceImage(imageFile);
+    }
+
+    // Update service
     const service = await db.service.update({
       where: { id: serviceId },
       data: {
-        title: body.title?.trim() || existing.title,
-        slug: body.slug?.trim()?.toLowerCase() || existing.slug,
-        category: body.category || existing.category,
-        summary: body.summary ?? existing.summary,
-        description: body.description ?? existing.description,
-        icon: body.icon || existing.icon,
-        features,
-        tools,
-        benefits,
-        process,
-        pricing,
-        status: body.status || existing.status,
-        displayOrder: body.displayOrder !== undefined ? parseInt(String(body.displayOrder)) : existing.displayOrder,
+        title: title?.trim() || existing.title,
+        slug: slug?.trim()?.toLowerCase() || existing.slug,
+        category: category || existing.category,
+        summary: summary ?? existing.summary,
+        description: description ?? existing.description,
+        icon: icon || existing.icon,
+        image: imageUrl,
+        features: features || existing.features,
+        tools: tools || existing.tools,
+        benefits: benefits || existing.benefits,
+        process: process || existing.process,
+        pricing: pricing ?? existing.pricing,
+        status,
+        displayOrder,
       },
     });
 
     return NextResponse.json(service);
   } catch (error) {
     console.error("PUT /api/admin/services/[id] Error:", error);
-
-    // Handle Prisma unique constraint violation
     if (error instanceof Error && error.message.includes("Unique constraint")) {
       return NextResponse.json({ error: "A service with this slug already exists" }, { status: 409 });
     }
-
-    const message = error instanceof Error ? error.message : "Failed to update service";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update service" }, { status: 500 });
   }
 }
 
@@ -128,21 +142,24 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid service ID" }, { status: 400 });
     }
 
-    // Check if service exists
     const existing = await db.service.findUnique({ where: { id: serviceId } });
     if (!existing) {
       return NextResponse.json({ error: "Service not found" }, { status: 404 });
     }
 
-    // Delete related records first
+    // Delete associated image if exists
+    if (existing.image) {
+      await deleteServiceImage(existing.image);
+    }
+
+    // Delete related records
     await db.serviceTestimonial.deleteMany({ where: { serviceId } });
     await db.serviceInquiry.deleteMany({ where: { serviceId } });
     await db.service.delete({ where: { id: serviceId } });
 
-    return NextResponse.json({ success: true, message: "Service deleted successfully" });
+    return NextResponse.json({ success: true, message: "Service deleted" });
   } catch (error) {
     console.error("DELETE /api/admin/services/[id] Error:", error);
-    const message = error instanceof Error ? error.message : "Failed to delete service";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to delete service" }, { status: 500 });
   }
 }

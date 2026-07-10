@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ServiceMeta = {
@@ -11,6 +12,7 @@ type ServiceMeta = {
     tagline: string;
     description: string;
     icon: string;
+    image: string | null;   // ✅ Added image
 };
 
 interface ServicePageClientProps {
@@ -37,7 +39,6 @@ const PAIN_POINTS = [
     { icon: "🤖", text: "No AI integration while competitors pull ahead" },
 ];
 
-// What you'll gain — fallback if DB benefits are empty
 const DEFAULT_GAINS = [
     {
         icon: "📊",
@@ -83,7 +84,6 @@ const DEFAULT_GAINS = [
     },
 ];
 
-// Technology organised by discipline
 const TECH_DISCIPLINES = [
     {
         label: "Software Engineering",
@@ -119,7 +119,6 @@ const TECH_DISCIPLINES = [
     },
 ];
 
-// Analytics disciplines
 const ANALYTICS_DISCIPLINES = [
     {
         icon: "📊",
@@ -155,7 +154,6 @@ const ANALYTICS_DISCIPLINES = [
     },
 ];
 
-// SEO pipeline steps
 const SEO_PIPELINE = [
     "Website Audit",
     "Technical SEO",
@@ -167,7 +165,6 @@ const SEO_PIPELINE = [
     "Continuous Growth",
 ];
 
-// SEO expertise cards
 const SEO_CARDS = [
     {
         icon: "⚡",
@@ -227,7 +224,6 @@ const SEO_CARDS = [
     },
 ];
 
-// WordPress capabilities
 const WP_CARDS = [
     { icon: "🎨", title: "Custom Themes", desc: "Hand-crafted WordPress themes built to your brand, pixel-perfect and fully responsive." },
     { icon: "🔌", title: "Plugin Integration", desc: "Seamless integration of best-in-class plugins with custom configuration and conflict resolution." },
@@ -241,7 +237,6 @@ const WP_CARDS = [
     { icon: "🔍", title: "SEO Optimization", desc: "RankMath/Yoast configuration, sitemap setup, schema markup, and Search Console integration." },
 ];
 
-// Default FAQ
 const DEFAULT_FAQ = [
     { q: "Do you optimize Core Web Vitals?", a: "Yes. We audit every Lighthouse metric — LCP, CLS, and INP — and implement targeted fixes: lazy loading, image formats, render-blocking resource elimination, and server-side caching to hit 90+ scores." },
     { q: "Can you migrate WordPress websites?", a: "Yes. We perform zero-downtime migrations using staging environments, database export/import, domain DNS cutover, and full redirect mapping to preserve your SEO rankings." },
@@ -253,7 +248,6 @@ const DEFAULT_FAQ = [
     { q: "Can you integrate AI into an existing product?", a: "Yes. We embed LLM APIs (OpenAI, Anthropic, Gemini), build retrieval-augmented generation (RAG) systems, and deploy ML models as microservices within your existing architecture." },
 ];
 
-// Glass testimonial defaults
 const DEFAULT_TESTIMONIALS = [
     { quote: "Exceptional engineering quality. The platform handled launch-day traffic with zero downtime and Core Web Vitals scores above 95.", author: "Dr. A. Mwangi", role: "Director, EdTech Startup" },
     { quote: "The SPSS analysis and research dashboard were delivered ahead of schedule. The visualisations made our findings immediately clear to the board.", author: "Prof. J. Ochieng", role: "Head of Research, University of Nairobi" },
@@ -293,7 +287,8 @@ function SectionHeading({
             {sub && (
                 <p
                     className={`mt-3 text-base max-w-2xl leading-relaxed ${center ? "mx-auto" : ""
-                        } ${light ? "text-blue-100/80" : "text-gray-500 dark:text-gray-400"}`}
+                        } ${light ? "text-blue-100/80" : "text-gray-500 dark:text-gray-400"
+                        }`}
                 >
                     {sub}
                 </p>
@@ -302,27 +297,18 @@ function SectionHeading({
     );
 }
 
-// Mini sparkline SVG (decorative, analytics section background)
 function Sparkline({ color }: { color: string }) {
     const points = [8, 22, 14, 30, 18, 38, 26, 32, 40, 28, 44, 36, 50];
     const path = points
         .map((y, i) => `${i === 0 ? "M" : "L"} ${i * 9} ${52 - y}`)
         .join(" ");
     return (
-        <svg
-            width="108"
-            height="52"
-            viewBox="0 0 108 52"
-            fill="none"
-            className="opacity-20"
-            aria-hidden
-        >
+        <svg width="108" height="52" viewBox="0 0 108 52" fill="none" className="opacity-20" aria-hidden>
             <path d={path} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
     );
 }
 
-// FAQ item
 function FAQItem({ q, a }: { q: string; a: string }) {
     const [open, setOpen] = useState(false);
     return (
@@ -361,7 +347,6 @@ function FAQItem({ q, a }: { q: string; a: string }) {
     );
 }
 
-// Pricing card
 function PricingCard({
     plan,
     featured,
@@ -373,9 +358,7 @@ function PricingCard({
 }) {
     return (
         <div
-            className={`relative rounded-3xl p-8 flex flex-col transition-all duration-300 ${featured
-                    ? "shadow-2xl scale-105"
-                    : "hover:-translate-y-1 hover:shadow-xl"
+            className={`relative rounded-3xl p-8 flex flex-col transition-all duration-300 ${featured ? "shadow-2xl scale-105" : "hover:-translate-y-1 hover:shadow-xl"
                 }`}
             style={{
                 background: featured
@@ -400,16 +383,10 @@ function PricingCard({
                     </span>
                 </div>
             )}
-            <h3
-                className={`text-xl font-black mb-1 ${featured ? "text-white" : "text-gray-900 dark:text-white"
-                    }`}
-            >
+            <h3 className={`text-xl font-black mb-1 ${featured ? "text-white" : "text-gray-900 dark:text-white"}`}>
                 {plan.name}
             </h3>
-            <p
-                className={`text-3xl font-black mb-6 ${featured ? "text-indigo-300" : "text-blue-600 dark:text-blue-400"
-                    }`}
-            >
+            <p className={`text-3xl font-black mb-6 ${featured ? "text-indigo-300" : "text-blue-600 dark:text-blue-400"}`}>
                 {plan.price}
             </p>
             <ul className="space-y-3 mb-8 flex-1">
@@ -452,6 +429,7 @@ function PricingCard({
 }
 
 // ─── Main client component ─────────────────────────────────────────────────────
+
 export default function ServicePageClient({
     service,
     features,
@@ -479,7 +457,6 @@ export default function ServicePageClient({
     const displayTestimonials = testimonials.length > 0 ? testimonials : DEFAULT_TESTIMONIALS;
     const displayFaq = faq.length > 0 ? faq : DEFAULT_FAQ;
 
-    // Whether to show specialised sections (always show — they're core to this portfolio)
     const showAnalytics = true;
     const showSEO = true;
     const showWordPress = true;
@@ -517,7 +494,6 @@ export default function ServicePageClient({
                         background: "linear-gradient(135deg, #0f0f1e 0%, #130a2e 45%, #0a1628 100%)",
                     }}
                 >
-                    {/* Aurora blobs */}
                     <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
                         <div
                             className="absolute top-1/4 left-1/4 w-[520px] h-[520px] rounded-full blur-[130px]"
@@ -531,7 +507,6 @@ export default function ServicePageClient({
                             className="absolute bottom-1/4 left-1/3 w-[340px] h-[340px] rounded-full blur-[100px]"
                             style={{ background: "rgba(6,182,212,0.10)" }}
                         />
-                        {/* Subtle grid */}
                         <div
                             className="absolute inset-0 opacity-[0.035]"
                             style={{
@@ -580,7 +555,6 @@ export default function ServicePageClient({
                                         "Helping organizations transform raw data into business decisions, high-performance software, and measurable online growth."}
                                 </p>
 
-                                {/* 5-star trust signal */}
                                 <div className="flex items-center gap-3">
                                     <div className="flex gap-0.5">
                                         {Array.from({ length: 5 }).map((_, i) => (
@@ -598,7 +572,6 @@ export default function ServicePageClient({
                                     </span>
                                 </div>
 
-                                {/* CTA buttons */}
                                 <div className="flex flex-wrap gap-3 pt-2">
                                     <Link
                                         href={`/contact?service=${service.slug}`}
@@ -626,7 +599,7 @@ export default function ServicePageClient({
                                 </div>
                             </div>
 
-                            {/* Right: feature list or decorative stats */}
+                            {/* Right: feature list OR image */}
                             <div
                                 className="hidden md:block rounded-3xl p-8"
                                 style={{
@@ -635,44 +608,62 @@ export default function ServicePageClient({
                                     backdropFilter: "blur(12px)",
                                 }}
                             >
-                                <p
-                                    className="text-xs font-black tracking-[0.2em] uppercase mb-5"
-                                    style={{ color: "rgba(129,140,248,0.7)" }}
-                                >
-                                    {features.length > 0 ? "What's Included" : "Core Capabilities"}
-                                </p>
-                                <ul className="space-y-3">
-                                    {(features.length > 0 ? features : [
-                                        "End-to-end project delivery",
-                                        "Production-grade code quality",
-                                        "Security & performance built-in",
-                                        "Cloud-native deployment",
-                                        "Ongoing support & documentation",
-                                        "Weekly progress updates",
-                                    ]).map((f, i) => (
-                                        <li key={i} className="flex items-start gap-3 text-sm" style={{ color: "rgba(203,213,225,0.85)" }}>
-                                            <span
-                                                className="mt-0.5 w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-black"
-                                                style={{
-                                                    background: "rgba(99,102,241,0.2)",
-                                                    color: "#a5b4fc",
-                                                    border: "1px solid rgba(99,102,241,0.3)",
-                                                }}
-                                            >
-                                                ✓
-                                            </span>
-                                            {f}
-                                        </li>
-                                    ))}
-                                </ul>
+                                {service.image ? (
+                                    // ✅ Display uploaded image
+                                    <div className="relative w-full aspect-video rounded-2xl overflow-hidden">
+                                        <Image
+                                            src={service.image}
+                                            alt={service.name}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                ) : (
+                                    // Fallback: feature list
+                                    <>
+                                        <p
+                                            className="text-xs font-black tracking-[0.2em] uppercase mb-5"
+                                            style={{ color: "rgba(129,140,248,0.7)" }}
+                                        >
+                                            {features.length > 0 ? "What's Included" : "Core Capabilities"}
+                                        </p>
+                                        <ul className="space-y-3">
+                                            {(features.length > 0 ? features : [
+                                                "End-to-end project delivery",
+                                                "Production-grade code quality",
+                                                "Security & performance built-in",
+                                                "Cloud-native deployment",
+                                                "Ongoing support & documentation",
+                                                "Weekly progress updates",
+                                            ]).map((f, i) => (
+                                                <li key={i} className="flex items-start gap-3 text-sm" style={{ color: "rgba(203,213,225,0.85)" }}>
+                                                    <span
+                                                        className="mt-0.5 w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-black"
+                                                        style={{
+                                                            background: "rgba(99,102,241,0.2)",
+                                                            color: "#a5b4fc",
+                                                            border: "1px solid rgba(99,102,241,0.3)",
+                                                        }}
+                                                    >
+                                                        ✓
+                                                    </span>
+                                                    {f}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
                 </section>
 
-                {/* ════════════════════════════════════════════════════════════════════
-            2. BUSINESS CHALLENGES WE SOLVE
-        ════════════════════════════════════════════════════════════════════ */}
+                {/* ────────────────────────────────
+            All other sections remain exactly the same
+            (Business Challenges, What You'll Gain, Tech Stack, etc.)
+            ──────────────────────────────── */}
+
+                {/* ═══ 2. BUSINESS CHALLENGES WE SOLVE ═══ */}
                 <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
                     <div className="max-w-7xl mx-auto px-6 sm:px-8">
                         <SectionLabel>Pain points</SectionLabel>
@@ -695,9 +686,7 @@ export default function ServicePageClient({
                     </div>
                 </section>
 
-                {/* ════════════════════════════════════════════════════════════════════
-            3. WHAT YOU'LL GAIN
-        ════════════════════════════════════════════════════════════════════ */}
+                {/* ═══ 3. WHAT YOU'LL GAIN ═══ */}
                 <section className="py-20 bg-white dark:bg-gray-950">
                     <div className="max-w-7xl mx-auto px-6 sm:px-8">
                         <SectionLabel>Outcomes</SectionLabel>
@@ -710,11 +699,7 @@ export default function ServicePageClient({
                                     key={i}
                                     className="group relative rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-7 overflow-hidden hover:-translate-y-2 hover:shadow-2xl transition-all duration-300"
                                 >
-                                    {/* Top gradient accent */}
-                                    <div
-                                        className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${card.gradient}`}
-                                    />
-                                    {/* Glow hover */}
+                                    <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${card.gradient}`} />
                                     <div
                                         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                                         style={{
@@ -745,17 +730,13 @@ export default function ServicePageClient({
                     </div>
                 </section>
 
-                {/* ════════════════════════════════════════════════════════════════════
-            4. TECHNOLOGY BY DISCIPLINE
-        ════════════════════════════════════════════════════════════════════ */}
+                {/* ═══ 4. TECHNOLOGY BY DISCIPLINE ═══ */}
                 <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
                     <div className="max-w-7xl mx-auto px-6 sm:px-8">
                         <SectionLabel>Technical depth</SectionLabel>
                         <SectionHeading sub="Organised by discipline — not scattered lists. Every tool chosen for a reason.">
                             Technology Stack
                         </SectionHeading>
-
-                        {/* If DB has custom tech, merge; otherwise use static */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             {(Object.keys(techStack).length > 0
                                 ? Object.entries(techStack).map(([label, tools], i) => ({
@@ -783,10 +764,7 @@ export default function ServicePageClient({
                                         >
                                             {disc.icon}
                                         </div>
-                                        <h3
-                                            className="font-black text-base"
-                                            style={{ color: disc.color }}
-                                        >
+                                        <h3 className="font-black text-base" style={{ color: disc.color }}>
                                             {disc.label}
                                         </h3>
                                     </div>
@@ -811,9 +789,7 @@ export default function ServicePageClient({
                     </div>
                 </section>
 
-                {/* ════════════════════════════════════════════════════════════════════
-            5. DELIVERY PROCESS (from DB or skipped if empty)
-        ════════════════════════════════════════════════════════════════════ */}
+                {/* ═══ 5. DELIVERY PROCESS ═══ */}
                 {process.length > 0 && (
                     <section className="py-20 bg-white dark:bg-gray-950">
                         <div className="max-w-7xl mx-auto px-6 sm:px-8">
@@ -847,9 +823,7 @@ export default function ServicePageClient({
                     </section>
                 )}
 
-                {/* ════════════════════════════════════════════════════════════════════
-            6. DATA ANALYTICS & DECISION INTELLIGENCE
-        ════════════════════════════════════════════════════════════════════ */}
+                {/* ═══ 6. DATA ANALYTICS & DECISION INTELLIGENCE ═══ */}
                 {showAnalytics && (
                     <section
                         className="py-20"
@@ -858,16 +832,12 @@ export default function ServicePageClient({
                         }}
                     >
                         <div className="max-w-7xl mx-auto px-6 sm:px-8">
-                            {/* Header */}
                             <div className="text-center mb-12">
                                 <p
                                     className="inline-flex items-center gap-2 text-xs font-black tracking-[0.2em] uppercase mb-3"
                                     style={{ color: "rgba(129,140,248,0.8)" }}
                                 >
-                                    <span
-                                        className="w-6 h-px"
-                                        style={{ background: "#818cf8" }}
-                                    />
+                                    <span className="w-6 h-px" style={{ background: "#818cf8" }} />
                                     Decision Intelligence
                                 </p>
                                 <h2
@@ -884,7 +854,6 @@ export default function ServicePageClient({
                                     Transforming raw data into strategic decisions through rigorous statistical analysis and clear visualization.
                                 </p>
                             </div>
-
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 {ANALYTICS_DISCIPLINES.map((disc, i) => (
                                     <div
@@ -895,11 +864,9 @@ export default function ServicePageClient({
                                             border: `1px solid ${disc.border}`,
                                         }}
                                     >
-                                        {/* Decorative sparkline */}
                                         <div className="absolute bottom-3 right-3 pointer-events-none">
                                             <Sparkline color={disc.color} />
                                         </div>
-
                                         <div className="relative">
                                             <div className="flex items-center gap-3 mb-4">
                                                 <div
@@ -908,10 +875,7 @@ export default function ServicePageClient({
                                                 >
                                                     {disc.icon}
                                                 </div>
-                                                <h3
-                                                    className="font-black text-base"
-                                                    style={{ color: disc.color }}
-                                                >
+                                                <h3 className="font-black text-base" style={{ color: disc.color }}>
                                                     {disc.title}
                                                 </h3>
                                             </div>
@@ -938,9 +902,7 @@ export default function ServicePageClient({
                     </section>
                 )}
 
-                {/* ════════════════════════════════════════════════════════════════════
-            7. SEO & DIGITAL GROWTH
-        ════════════════════════════════════════════════════════════════════ */}
+                {/* ═══ 7. SEO & DIGITAL GROWTH ═══ */}
                 {showSEO && (
                     <section className="py-20 bg-white dark:bg-gray-950">
                         <div className="max-w-7xl mx-auto px-6 sm:px-8">
@@ -949,7 +911,6 @@ export default function ServicePageClient({
                                 SEO &amp; Digital Growth
                             </SectionHeading>
 
-                            {/* SEO Pipeline */}
                             <div
                                 className="rounded-2xl p-6 mb-8"
                                 style={{
@@ -957,19 +918,14 @@ export default function ServicePageClient({
                                     border: "1px solid rgba(245,158,11,0.2)",
                                 }}
                             >
-                                <p
-                                    className="text-xs font-black tracking-[0.15em] uppercase mb-5"
-                                    style={{ color: "rgba(245,158,11,0.8)" }}
-                                >
+                                <p className="text-xs font-black tracking-[0.15em] uppercase mb-5" style={{ color: "rgba(245,158,11,0.8)" }}>
                                     SEO Workflow
                                 </p>
                                 <div className="flex flex-wrap items-center gap-2">
                                     {SEO_PIPELINE.map((step, i) => (
                                         <React.Fragment key={step}>
                                             <button
-                                                onClick={() =>
-                                                    setActivePipelineStep(activePipelineStep === i ? null : i)
-                                                }
+                                                onClick={() => setActivePipelineStep(activePipelineStep === i ? null : i)}
                                                 className="px-4 py-2 rounded-xl text-sm font-bold transition-all"
                                                 style={
                                                     activePipelineStep === i
@@ -989,10 +945,7 @@ export default function ServicePageClient({
                                                 {step}
                                             </button>
                                             {i < SEO_PIPELINE.length - 1 && (
-                                                <span
-                                                    className="font-bold text-sm"
-                                                    style={{ color: "rgba(245,158,11,0.4)" }}
-                                                >
+                                                <span className="font-bold text-sm" style={{ color: "rgba(245,158,11,0.4)" }}>
                                                     ↓
                                                 </span>
                                             )}
@@ -1024,7 +977,6 @@ export default function ServicePageClient({
                                 )}
                             </div>
 
-                            {/* SEO expertise cards grid */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                 {SEO_CARDS.map((card, i) => (
                                     <div
@@ -1034,10 +986,7 @@ export default function ServicePageClient({
                                     >
                                         <div className="flex items-center gap-2 mb-3">
                                             <span className="text-xl">{card.icon}</span>
-                                            <h3
-                                                className="font-black text-sm"
-                                                style={{ color: card.color }}
-                                            >
+                                            <h3 className="font-black text-sm" style={{ color: card.color }}>
                                                 {card.title}
                                             </h3>
                                         </div>
@@ -1059,9 +1008,7 @@ export default function ServicePageClient({
                     </section>
                 )}
 
-                {/* ════════════════════════════════════════════════════════════════════
-            8. WORDPRESS ENGINEERING
-        ════════════════════════════════════════════════════════════════════ */}
+                {/* ═══ 8. WORDPRESS ENGINEERING ═══ */}
                 {showWordPress && (
                     <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
                         <div className="max-w-7xl mx-auto px-6 sm:px-8">
@@ -1075,7 +1022,6 @@ export default function ServicePageClient({
                                         key={i}
                                         className="group rounded-2xl p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:border-blue-200 dark:hover:border-blue-800 hover:-translate-y-1.5 hover:shadow-xl transition-all duration-200 overflow-hidden relative"
                                     >
-                                        {/* Micro gradient bar */}
                                         <div
                                             className="absolute top-0 left-0 right-0 h-0.5"
                                             style={{
@@ -1092,9 +1038,7 @@ export default function ServicePageClient({
                     </section>
                 )}
 
-                {/* ════════════════════════════════════════════════════════════════════
-            9. PRICING
-        ════════════════════════════════════════════════════════════════════ */}
+                {/* ═══ 9. PRICING ═══ */}
                 {pricing.length > 0 && (
                     <section className="py-20 bg-white dark:bg-gray-950">
                         <div className="max-w-5xl mx-auto px-6 sm:px-8">
@@ -1116,9 +1060,7 @@ export default function ServicePageClient({
                     </section>
                 )}
 
-                {/* ════════════════════════════════════════════════════════════════════
-            10. GLASS TESTIMONIALS (3 cards)
-        ════════════════════════════════════════════════════════════════════ */}
+                {/* ═══ 10. GLASS TESTIMONIALS ═══ */}
                 <section
                     className="py-20"
                     style={{
@@ -1157,24 +1099,15 @@ export default function ServicePageClient({
                                         boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
                                     }}
                                 >
-                                    {/* Stars */}
                                     <div className="flex gap-0.5">
                                         {Array.from({ length: 5 }).map((_, s) => (
                                             <span key={s} style={{ color: "#FBBF24", fontSize: "0.85rem" }}>★</span>
                                         ))}
                                     </div>
-                                    {/* Quote */}
-                                    <blockquote
-                                        className="text-sm leading-relaxed flex-1"
-                                        style={{ color: "rgba(203,213,225,0.9)" }}
-                                    >
+                                    <blockquote className="text-sm leading-relaxed flex-1" style={{ color: "rgba(203,213,225,0.9)" }}>
                                         &ldquo;{t.quote}&rdquo;
                                     </blockquote>
-                                    {/* Author */}
-                                    <div
-                                        className="pt-4 border-t"
-                                        style={{ borderColor: "rgba(255,255,255,0.08)" }}
-                                    >
+                                    <div className="pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                                         <p className="font-bold text-white text-sm">{t.author}</p>
                                         <p className="text-xs mt-0.5" style={{ color: "rgba(148,163,184,0.7)" }}>{t.role}</p>
                                     </div>
@@ -1184,16 +1117,11 @@ export default function ServicePageClient({
                     </div>
                 </section>
 
-                {/* ════════════════════════════════════════════════════════════════════
-            11. FAQ
-        ════════════════════════════════════════════════════════════════════ */}
+                {/* ═══ 11. FAQ ═══ */}
                 <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
                     <div className="max-w-3xl mx-auto px-6 sm:px-8">
                         <SectionLabel>Common questions</SectionLabel>
-                        <SectionHeading
-                            center
-                            sub="Everything clients ask before starting a project."
-                        >
+                        <SectionHeading center sub="Everything clients ask before starting a project.">
                             Frequently Asked Questions
                         </SectionHeading>
                         <div className="space-y-3 mt-2">
@@ -1204,16 +1132,13 @@ export default function ServicePageClient({
                     </div>
                 </section>
 
-                {/* ════════════════════════════════════════════════════════════════════
-            12. FINAL CTA — aurora gradient
-        ════════════════════════════════════════════════════════════════════ */}
+                {/* ═══ 12. FINAL CTA ═══ */}
                 <section className="py-20 bg-white dark:bg-gray-950">
                     <div className="max-w-5xl mx-auto px-6 sm:px-8">
                         <div
                             className="relative rounded-3xl overflow-hidden"
                             style={{ boxShadow: "0 32px 64px -16px rgba(99,102,241,0.3)" }}
                         >
-                            {/* Aurora BG */}
                             <div
                                 aria-hidden
                                 className="absolute inset-0"
@@ -1221,7 +1146,6 @@ export default function ServicePageClient({
                                     background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #1e3a5f 100%)",
                                 }}
                             />
-                            {/* Animated glow orbs */}
                             <div
                                 aria-hidden
                                 className="absolute top-0 left-1/4 w-72 h-72 rounded-full blur-3xl pointer-events-none"
@@ -1232,7 +1156,6 @@ export default function ServicePageClient({
                                 className="absolute bottom-0 right-1/4 w-72 h-72 rounded-full blur-3xl pointer-events-none"
                                 style={{ background: "rgba(139,92,246,0.2)", animation: "aurora2 18s ease-in-out infinite" }}
                             />
-                            {/* Grid overlay */}
                             <div
                                 aria-hidden
                                 className="absolute inset-0 opacity-[0.04]"
@@ -1242,14 +1165,9 @@ export default function ServicePageClient({
                                 }}
                             />
 
-                            {/* Content */}
                             <div className="relative py-20 px-8 md:px-16 grid md:grid-cols-2 gap-12 items-center">
-                                {/* Left */}
                                 <div>
-                                    <p
-                                        className="text-xs font-black tracking-[0.25em] uppercase mb-4"
-                                        style={{ color: "rgba(165,180,252,0.7)" }}
-                                    >
+                                    <p className="text-xs font-black tracking-[0.25em] uppercase mb-4" style={{ color: "rgba(165,180,252,0.7)" }}>
                                         Ready to start?
                                     </p>
                                     <h2
@@ -1287,12 +1205,8 @@ export default function ServicePageClient({
                                     </div>
                                 </div>
 
-                                {/* Right: capability checklist */}
                                 <div>
-                                    <p
-                                        className="text-xs font-black tracking-[0.15em] uppercase mb-4"
-                                        style={{ color: "rgba(165,180,252,0.6)" }}
-                                    >
+                                    <p className="text-xs font-black tracking-[0.15em] uppercase mb-4" style={{ color: "rgba(165,180,252,0.6)" }}>
                                         Whether you need
                                     </p>
                                     <ul className="space-y-3">
@@ -1312,19 +1226,13 @@ export default function ServicePageClient({
                                                 >
                                                     ✔
                                                 </span>
-                                                <span
-                                                    className="text-sm font-semibold"
-                                                    style={{ color: "rgba(203,213,225,0.9)" }}
-                                                >
+                                                <span className="text-sm font-semibold" style={{ color: "rgba(203,213,225,0.9)" }}>
                                                     {item}
                                                 </span>
                                             </li>
                                         ))}
                                     </ul>
-                                    <p
-                                        className="mt-6 text-sm font-bold"
-                                        style={{ color: "rgba(165,180,252,0.8)" }}
-                                    >
+                                    <p className="mt-6 text-sm font-bold" style={{ color: "rgba(165,180,252,0.8)" }}>
                                         — we&apos;re ready to help.
                                     </p>
                                 </div>

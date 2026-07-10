@@ -1,13 +1,11 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL")        // Pooling URL for serverless environments
-  directUrl = env("POSTGRES_URL_NON_POOLING")   // Non‑pooling URL for migrations
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model Profile {
@@ -81,7 +79,7 @@ model Project {
   comments           Comment[]
   reactions          Reaction[]
   clicks             ProjectClick[]
-  views              ProjectView[]   // <-- added this line to complete the relation
+  views              ProjectView[]
 }
 
 model ProjectView {
@@ -162,6 +160,7 @@ model Service {
   summary      String
   description  String
   icon         String
+  image        String?            // ✅ NEW: URL of uploaded image
   features     String
   tools        String
   benefits     String

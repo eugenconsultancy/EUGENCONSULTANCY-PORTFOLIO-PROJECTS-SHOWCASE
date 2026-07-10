@@ -1,7 +1,9 @@
+// src/app/api/admin/services/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { saveServiceImage } from "@/lib/upload";
 
 export async function GET() {
   try {
@@ -14,10 +16,7 @@ export async function GET() {
       orderBy: { displayOrder: "asc" },
       include: {
         _count: {
-          select: {
-            inquiries: true,
-            testimonials: true,
-          },
+          select: { inquiries: true, testimonials: true },
         },
       },
     });
@@ -25,8 +24,7 @@ export async function GET() {
     return NextResponse.json(services);
   } catch (error) {
     console.error("GET /api/admin/services Error:", error);
-    const message = error instanceof Error ? error.message : "Failed to fetch services";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch services" }, { status: 500 });
   }
 }
 
@@ -37,64 +35,58 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
+    const formData = await request.formData();
+    const title = formData.get("title") as string;
+    const slug = formData.get("slug") as string;
+    const category = formData.get("category") as string;
+    const summary = formData.get("summary") as string;
+    const description = formData.get("description") as string;
+    const icon = formData.get("icon") as string;
+    const features = formData.get("features") as string;
+    const tools = formData.get("tools") as string;
+    const benefits = formData.get("benefits") as string;
+    const process = formData.get("process") as string;
+    const pricing = formData.get("pricing") as string | null;
+    const status = (formData.get("status") as string) || "DRAFT";
+    const displayOrder = parseInt((formData.get("displayOrder") as string) || "0", 10);
 
-    // Log incoming request for debugging (truncated for security)
-    console.log("POST /api/admin/services - Creating service:", {
-      title: body.title,
-      slug: body.slug,
-      category: body.category,
-      status: body.status,
-    });
-
-    // Validate required fields
-    if (!body.title || !body.title.trim()) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+    // Image file
+    const imageFile = formData.get("image") as File | null;
+    let imageUrl: string | null = null;
+    if (imageFile && imageFile.size > 0) {
+      imageUrl = await saveServiceImage(imageFile);
     }
 
-    if (!body.slug || !body.slug.trim()) {
-      return NextResponse.json({ error: "Slug is required" }, { status: 400 });
+    // Validate required
+    if (!title?.trim() || !slug?.trim()) {
+      return NextResponse.json({ error: "Title and slug are required" }, { status: 400 });
     }
-
-    // Ensure JSON fields are strings
-    const features = typeof body.features === "string" ? body.features : JSON.stringify(body.features || []);
-    const tools = typeof body.tools === "string" ? body.tools : JSON.stringify(body.tools || []);
-    const benefits = typeof body.benefits === "string" ? body.benefits : JSON.stringify(body.benefits || []);
-    const process = typeof body.process === "string" ? body.process : JSON.stringify(body.process || []);
-    const pricing = body.pricing
-      ? typeof body.pricing === "string"
-        ? body.pricing
-        : JSON.stringify(body.pricing)
-      : null;
 
     const service = await db.service.create({
       data: {
-        title: body.title.trim(),
-        slug: body.slug.trim().toLowerCase(),
-        category: body.category || "Other",
-        summary: body.summary || "",
-        description: body.description || "",
-        icon: body.icon || "📦",
-        features,
-        tools,
-        benefits,
-        process,
-        pricing,
-        status: body.status || "DRAFT",
-        displayOrder: parseInt(String(body.displayOrder)) || 0,
+        title: title.trim(),
+        slug: slug.trim().toLowerCase(),
+        category: category || "Other",
+        summary: summary || "",
+        description: description || "",
+        icon: icon || "📦",
+        image: imageUrl,
+        features: features || "[]",
+        tools: tools || "[]",
+        benefits: benefits || "[]",
+        process: process || "[]",
+        pricing: pricing || null,
+        status,
+        displayOrder,
       },
     });
 
     return NextResponse.json(service, { status: 201 });
   } catch (error) {
     console.error("POST /api/admin/services Error:", error);
-
-    // Handle Prisma unique constraint violation
     if (error instanceof Error && error.message.includes("Unique constraint")) {
       return NextResponse.json({ error: "A service with this slug already exists" }, { status: 409 });
     }
-
-    const message = error instanceof Error ? error.message : "Failed to create service";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create service" }, { status: 500 });
   }
 }

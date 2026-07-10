@@ -9,6 +9,7 @@ export default function NewServicePage() {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
     const [formData, setFormData] = useState({
         title: "",
@@ -35,22 +36,34 @@ export default function NewServicePage() {
         }
     };
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setSelectedImage(e.target.files[0]);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
         setError("");
 
         try {
-            const data = {
-                ...formData,
-                displayOrder: parseInt(formData.displayOrder) || 0,
-                pricing: formData.pricing || null,
-            };
+            const form = new FormData();
+            // Append all form fields
+            Object.entries(formData).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    form.append(key, value);
+                }
+            });
+            // Append image if selected
+            if (selectedImage) {
+                form.append("image", selectedImage);
+            }
 
             const res = await fetch("/api/admin/services", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
+                // ✅ DO NOT set Content-Type – browser will use multipart/form-data with boundary
+                body: form,
             });
 
             if (!res.ok) {
@@ -91,7 +104,7 @@ export default function NewServicePage() {
                 </div>
             )}
 
-            <form id="service-form" onSubmit={handleSubmit} className="space-y-6">
+            <form id="service-form" onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data">
                 <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 space-y-4">
                     <h2 className="text-lg font-black text-gray-900 dark:text-white">Basic Information</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -133,6 +146,20 @@ export default function NewServicePage() {
                     <div>
                         <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Full Description *</label>
                         <textarea name="description" value={formData.description} onChange={handleChange} required rows={6} className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Detailed description..." />
+                    </div>
+                    {/* ✅ NEW: Image upload field */}
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">Service Image</label>
+                        <input
+                            type="file"
+                            name="image"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300"
+                        />
+                        {selectedImage && (
+                            <p className="mt-2 text-xs text-green-600 dark:text-green-400">Selected: {selectedImage.name}</p>
+                        )}
                     </div>
                 </div>
 

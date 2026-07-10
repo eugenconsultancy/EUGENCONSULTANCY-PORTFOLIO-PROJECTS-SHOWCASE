@@ -1,3 +1,4 @@
+// src/app/(public)/services/page.tsx
 export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import type { Metadata } from "next";
@@ -12,6 +13,7 @@ export default async function ServicesPage() {
     const services = await db.service.findMany({
         where: { status: "PUBLISHED" },
         orderBy: { displayOrder: "asc" },
+        // ✅ No `select` – returns all fields (including `image`)
     });
 
     return <ServicesClient services={services} />;

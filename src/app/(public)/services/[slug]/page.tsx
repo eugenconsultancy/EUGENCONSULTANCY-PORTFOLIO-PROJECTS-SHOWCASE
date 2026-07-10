@@ -1,3 +1,4 @@
+// src/app/(public)/services/[slug]/page.tsx
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -39,6 +40,7 @@ export default async function ServiceDetailPage({ params }: Props) {
     tagline: service.summary,
     description: service.description,
     icon: service.icon,
+    image: service.image,   // ✅ Pass image URL
   };
 
   const features = safeParse(service.features, []);
@@ -46,7 +48,6 @@ export default async function ServiceDetailPage({ params }: Props) {
   const process = safeParse(service.process, []);
   const pricing = service.pricing ? safeParse(service.pricing, []) : [];
 
-  // Ensure benefits is array of { title, items } - if flat strings, convert
   const benefits = Array.isArray(benefitsRaw) && benefitsRaw.length > 0 && typeof benefitsRaw[0] === "string"
     ? [{ title: "Key Benefits", items: benefitsRaw }]
     : benefitsRaw;
