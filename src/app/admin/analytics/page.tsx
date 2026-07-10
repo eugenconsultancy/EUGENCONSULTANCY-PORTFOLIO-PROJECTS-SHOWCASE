@@ -128,7 +128,7 @@ export default async function AnalyticsPage({
         _count: true,
       });
       const monthly: Record<string, number> = {};
-      views.forEach((v) => {
+      views.forEach((v: { createdAt: Date; _count: { _all: number } }) => {
         const d = new Date(v.createdAt);
         const key = monthNames[d.getMonth()] + " " + d.getFullYear().toString().slice(-2);
         monthly[key] = (monthly[key] || 0) + v._count._all;
