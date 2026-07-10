@@ -16,8 +16,6 @@ import {
   Layout,
   ImageIcon,
   FileText,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 
 type Project = Awaited<ReturnType<typeof getProjectDetail>>;
@@ -52,7 +50,6 @@ function GithubIcon({ size = 16 }: { size?: number }) {
 }
 
 // ── Premium Card wrapper ──
-// FIX: Added `min-w-0 overflow-hidden` to prevent text from blowing out the card width.
 function PremiumCard({
   children,
   className = "",
@@ -78,6 +75,15 @@ function SectionLabel({ color, label }: { color: string; label: string }) {
   );
 }
 
+// ── Strip markdown and HTML image syntax from a string ──
+// Used to prevent images from appearing twice (once in Description,
+// once in the dedicated Gallery tab).
+function stripImages(content: string): string {
+  return content
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "") // markdown: ![alt](url)
+    .replace(/<img[^>]*\/?>/gi, "");          // HTML: <img ...>
+}
+
 export function ProjectModal({
   slug,
   onClose,
@@ -87,23 +93,12 @@ export function ProjectModal({
 }) {
   const [project, setProject] = useState<Project | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "gallery" | "casestudy">("overview");
-  const [galleryIdx, setGalleryIdx] = useState(0);
   const [imgLoaded, setImgLoaded] = useState(false);
 
-  // ────────────────────────────────────────────────────────────
-  // CHANGE 1 — Focus management refs
-  //   modalRef   → points at the modal <div> for focus-trap queries
-  //   triggerRef → stores the element that was focused *before* the
-  //                modal opened, so we can restore focus on close
-  // ────────────────────────────────────────────────────────────
   const modalRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
 
-  // ────────────────────────────────────────────────────────────
-  // CHANGE 2 — Capture the trigger element once on mount.
-  //   The cleanup function runs when the modal unmounts (closes),
-  //   restoring focus back to whatever button/link opened it.
-  // ────────────────────────────────────────────────────────────
+  // Capture trigger element; restore focus on unmount
   useEffect(() => {
     triggerRef.current = document.activeElement as HTMLElement;
     return () => {
@@ -118,12 +113,7 @@ export function ProjectModal({
         return;
       }
 
-      // ──────────────────────────────────────────────────────
-      // CHANGE 3 — Focus trap on Tab / Shift+Tab.
-      //   We collect every focusable node inside the modal,
-      //   then redirect Tab at the last node back to the first,
-      //   and Shift+Tab at the first node back to the last.
-      // ──────────────────────────────────────────────────────
+      // Focus trap on Tab / Shift+Tab
       if (e.key === "Tab" && modalRef.current) {
         const focusable = Array.from(
           modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTORS)
@@ -135,43 +125,23 @@ export function ProjectModal({
         const last = focusable[focusable.length - 1];
 
         if (e.shiftKey) {
-          // Backwards tab from the first element → jump to last
           if (document.activeElement === first) {
             e.preventDefault();
             last.focus();
           }
         } else {
-          // Forwards tab from the last element → jump to first
           if (document.activeElement === last) {
             e.preventDefault();
             first.focus();
           }
         }
-        return;
-      }
-
-      // Gallery keyboard navigation
-      if (e.key === "ArrowLeft" && activeTab === "gallery") {
-        setGalleryIdx((prev) => (project ? Math.max(0, prev - 1) : 0));
-      }
-      if (e.key === "ArrowRight" && activeTab === "gallery") {
-        setGalleryIdx((prev) =>
-          project ? Math.min((project.images.length || 1) - 1, prev + 1) : 0
-        );
       }
     },
-    [onClose, activeTab, project]
+    [onClose]
   );
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
-
-    // ──────────────────────────────────────────────────────────
-    // CHANGE 4 — Use a CSS class instead of direct style mutation.
-    //   `.modal-open` in globals.css sets `overflow: hidden` AND
-    //   `scrollbar-gutter: stable` so the layout does not shift
-    //   when the scrollbar disappears. See globals.css for the rule.
-    // ──────────────────────────────────────────────────────────
     document.body.classList.add("modal-open");
 
     return () => {
@@ -180,7 +150,7 @@ export function ProjectModal({
     };
   }, [handleKeyDown]);
 
-  // Move focus into the modal as soon as the project data arrives
+  // Move focus into modal once project data arrives
   useEffect(() => {
     if (!project || !modalRef.current) return;
     const firstFocusable = modalRef.current.querySelector<HTMLElement>(FOCUSABLE_SELECTORS);
@@ -219,10 +189,15 @@ export function ProjectModal({
   }
 
   const processedBody = processMarkdownImages(project.body, project.images);
+
+  // Strip images from the description body so images only appear in Gallery tab.
+  const processedBodyNoImages = stripImages(processedBody);
+
   const imageList = project.images.map((img) => ({
     src: `${img.filename}`,
     alt: img.alt || img.filename,
   }));
+
   const readTime = readingTime(project.body);
   const mainImage = imageList[0];
   const hasCaseStudy =
@@ -249,7 +224,6 @@ export function ProjectModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.25 }}
-        // FIX: p-4 on mobile → breathing room from viewport edges
         className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-lg p-4 sm:p-6"
         onClick={onClose}
         aria-hidden="true"
@@ -266,11 +240,6 @@ export function ProjectModal({
           <X size={16} />
         </motion.button>
 
-        {/* ────────────────────────────────────────────────────────
-            CHANGE 5 — role="dialog" + aria-modal + aria-labelledby
-            on the *inner* container (the one users interact with),
-            not the backdrop. ref={modalRef} attaches our focus trap.
-        ──────────────────────────────────────────────────────── */}
         <motion.div
           key="modal"
           ref={modalRef}
@@ -281,13 +250,10 @@ export function ProjectModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 16 }}
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          // FIX: `min-w-0` added to the modal root to stop flex children
-          // from ignoring their parent's width constraint on mobile.
           className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-3xl bg-gray-50 dark:bg-[#111318] border border-white/10 dark:border-gray-700/60 shadow-[0_32px_80px_-12px_rgba(0,0,0,0.5)] flex flex-col min-w-0"
           onClick={(e) => e.stopPropagation()}
         >
           {/* ── Glassmorphism Header ── */}
-          {/* FIX: px-4 on mobile, px-6 on sm+ for tighter edge spacing */}
           <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-b border-gray-200/60 dark:border-gray-700/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl flex items-center justify-between gap-3 min-w-0">
             <div className="flex items-center gap-3 min-w-0 flex-1">
               {/* Avatar */}
@@ -299,7 +265,6 @@ export function ProjectModal({
               </div>
 
               <div className="min-w-0 flex-1">
-                {/* id="modal-title" links to aria-labelledby on the dialog */}
                 <h2
                   id="modal-title"
                   className="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate leading-tight"
@@ -385,8 +350,6 @@ export function ProjectModal({
           </div>
 
           {/* ── Tab Content ── */}
-          {/* FIX: `min-w-0` here ensures the scrollable area also respects
-              the flex container's width and doesn't overflow it. */}
           <div className="flex-1 overflow-y-auto overscroll-contain min-w-0">
             <AnimatePresence mode="wait">
 
@@ -401,7 +364,6 @@ export function ProjectModal({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2 }}
-                  // FIX: `min-w-0` + smaller padding on mobile (p-4 vs p-8)
                   className="p-4 sm:p-6 lg:p-8 space-y-5 min-w-0"
                 >
                   {/* Hero image */}
@@ -417,7 +379,6 @@ export function ProjectModal({
                         priority
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                      {/* FIX: `right-4` added so tags don't bleed off the right edge */}
                       <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-1.5">
                         {project.techStack
                           .split(",")
@@ -442,7 +403,6 @@ export function ProjectModal({
                   {/* Summary card */}
                   <PremiumCard>
                     <SectionLabel color="text-blue-500 dark:text-blue-400" label="About" />
-                    {/* FIX: `break-words` forces long words/URLs onto the next line */}
                     <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed break-words">
                       {project.summary}
                     </p>
@@ -451,8 +411,6 @@ export function ProjectModal({
                   {/* Tech stack – full list */}
                   <PremiumCard>
                     <SectionLabel color="text-violet-500 dark:text-violet-400" label="Tech Stack" />
-                    {/* FIX: `flex-wrap` was already here but `min-w-0` on PremiumCard
-                        now stops the tag container from pushing outside its bounds */}
                     <div className="flex flex-wrap gap-2">
                       {project.techStack.split(",").map((tech) => (
                         <span
@@ -465,13 +423,20 @@ export function ProjectModal({
                     </div>
                   </PremiumCard>
 
-                  {/* Description */}
+                  {/* Description — images stripped so they only show in Gallery tab */}
                   <PremiumCard>
                     <SectionLabel color="text-gray-400 dark:text-gray-500" label="Description" />
-                    {/* FIX: `break-words overflow-hidden` on the prose wrapper
-                        prevents markdown content from overflowing its card */}
                     <div className="prose prose-sm prose-gray dark:prose-invert max-w-none break-words overflow-hidden prose-headings:text-gray-900 dark:prose-headings:text-white prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-strong:text-gray-900 dark:prose-strong:text-white prose-code:bg-gray-100 dark:prose-code:bg-gray-700 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-pre:overflow-x-auto">
-                      <ProjectImagesRenderer content={processedBody} images={imageList} />
+                      {/*
+                        Pass processedBodyNoImages (images stripped) so images are
+                        not rendered here AND again inside the Gallery tab.
+                        The imageList prop is intentionally empty to suppress any
+                        image-gallery behaviour inside ProjectImagesRenderer itself.
+                      */}
+                      <ProjectImagesRenderer
+                        content={processedBodyNoImages}
+                        images={[]}
+                      />
                     </div>
                   </PremiumCard>
 
@@ -501,7 +466,7 @@ export function ProjectModal({
                 </motion.div>
               )}
 
-              {/* ─── Gallery Tab ─── */}
+              {/* ─── Gallery Tab — 2-column grid ─── */}
               {activeTab === "gallery" && (
                 <motion.div
                   key="gallery"
@@ -522,97 +487,37 @@ export function ProjectModal({
                       <p className="text-sm font-medium">No images uploaded</p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      {/* Cinematic main viewer */}
-                      <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-[#0a0a0b]">
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key={galleryIdx}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.25 }}
-                            className="absolute inset-0"
-                          >
-                            <Image
-                              src={imageList[galleryIdx].src}
-                              alt={imageList[galleryIdx].alt}
-                              fill
-                              className="object-contain"
-                            />
-                          </motion.div>
-                        </AnimatePresence>
-
-                        {imageList.length > 1 && (
-                          <>
-                            <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-black/40 to-transparent pointer-events-none" />
-                            <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-black/40 to-transparent pointer-events-none" />
-
-                            <button
-                              onClick={() =>
-                                setGalleryIdx((prev) => Math.max(0, prev - 1))
-                              }
-                              disabled={galleryIdx === 0}
-                              aria-label="Previous image"
-                              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-md border border-white/10 text-white flex items-center justify-center transition-all hover:scale-110 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
-                            >
-                              <ChevronLeft size={18} />
-                            </button>
-                            <button
-                              onClick={() =>
-                                setGalleryIdx((prev) =>
-                                  Math.min(imageList.length - 1, prev + 1)
-                                )
-                              }
-                              disabled={galleryIdx === imageList.length - 1}
-                              aria-label="Next image"
-                              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-md border border-white/10 text-white flex items-center justify-center transition-all hover:scale-110 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:scale-100 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
-                            >
-                              <ChevronRight size={18} />
-                            </button>
-                          </>
-                        )}
-
-                        {/* Counter badge */}
+                    /*
+                      2-column grid — each cell is a fixed aspect-video box.
+                      Cards are self-contained: no selection state, no prev/next nav.
+                      Images wrap naturally into rows as the list grows.
+                    */
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                      {imageList.map((img, idx) => (
                         <div
-                          aria-live="polite"
-                          aria-atomic="true"
-                          className="absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold tracking-wide border border-white/10"
+                          key={idx}
+                          className="relative aspect-video rounded-2xl overflow-hidden bg-[#0a0a0b] group"
                         >
-                          {galleryIdx + 1} / {imageList.length}
+                          <Image
+                            src={img.src}
+                            alt={img.alt}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+                          {/* Caption overlay — only rendered when alt text exists */}
+                          {img.alt && (
+                            <div className="absolute inset-x-0 bottom-0 px-3 py-2 bg-gradient-to-t from-black/70 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-200">
+                              <p className="text-white text-[11px] font-medium truncate">
+                                {img.alt}
+                              </p>
+                            </div>
+                          )}
+                          {/* Index badge */}
+                          <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold border border-white/10 leading-none">
+                            {idx + 1}
+                          </div>
                         </div>
-                      </div>
-
-                      {/* Thumbnail strip */}
-                      {imageList.length > 1 && (
-                        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
-                          {imageList.map((img, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => setGalleryIdx(idx)}
-                              aria-label={`View image ${idx + 1}${img.alt ? `: ${img.alt}` : ""}`}
-                              aria-pressed={idx === galleryIdx}
-                              className={`relative w-20 h-14 rounded-xl overflow-hidden flex-shrink-0 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none ${idx === galleryIdx
-                                  ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-50 dark:ring-offset-[#111318] opacity-100 scale-100"
-                                  : "opacity-50 hover:opacity-80 scale-95 hover:scale-100"
-                                }`}
-                            >
-                              <Image
-                                src={img.src}
-                                alt={img.alt}
-                                fill
-                                className="object-cover"
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {imageList[galleryIdx].alt && (
-                        <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
-                          {imageList[galleryIdx].alt}
-                        </p>
-                      )}
+                      ))}
                     </div>
                   )}
                 </motion.div>
@@ -631,9 +536,13 @@ export function ProjectModal({
                   transition={{ duration: 0.2 }}
                   className="p-4 sm:p-6 lg:p-8"
                 >
-                  {/* FIX: gap-4 grid is consistent — both rows use the same
-                      column grid so cards always align correctly on mobile */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/*
+                    `items-start` is the critical fix here:
+                    Without it, CSS grid stretches every card in a row to match
+                    the tallest sibling. With `items-start`, each card is only
+                    as tall as its own content — no artificial padding.
+                  */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
                     {project.problem && (
                       <div className="col-span-1 sm:col-span-2">
                         <PremiumCard className="border-red-100 dark:border-red-900/30 bg-red-50/60 dark:bg-red-950/20">
@@ -668,8 +577,6 @@ export function ProjectModal({
                         <PremiumCard className="border-violet-100 dark:border-violet-900/30 bg-violet-50/60 dark:bg-violet-950/20">
                           <SectionLabel color="text-violet-500 dark:text-violet-400" label="Metrics" />
                           {project.metrics.includes(":") ? (
-                            // FIX: `min-w-0` on each metric cell stops the grid
-                            // from overflowing when values are long strings
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                               {project.metrics
                                 .split("\n")
