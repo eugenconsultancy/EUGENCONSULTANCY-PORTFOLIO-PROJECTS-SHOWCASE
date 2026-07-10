@@ -81,6 +81,14 @@ model Project {
   comments           Comment[]
   reactions          Reaction[]
   clicks             ProjectClick[]
+  views              ProjectView[]   // <-- added this line to complete the relation
+}
+
+model ProjectView {
+  id        Int      @id @default(autoincrement())
+  projectId Int
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id])
 }
 
 model ProjectImage {
