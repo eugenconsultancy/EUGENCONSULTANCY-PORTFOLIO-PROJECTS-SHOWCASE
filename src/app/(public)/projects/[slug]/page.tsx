@@ -321,17 +321,23 @@ export default async function ProjectDetailPage({
                       return (
                         <div
                           key={i}
-                          className="flex items-center gap-3 rounded-xl px-3 py-2.5"
+                          className="flex items-center gap-3 rounded-xl px-3 py-2.5 min-w-0 overflow-hidden"
                           style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(8px)" }}
                         >
                           <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(129,140,248,0.15)", border: "1px solid rgba(129,140,248,0.25)" }}>
                             <Icon size={14} style={{ color: "#a5b4fc" }} />
                           </div>
-                          <div className="min-w-0">
-                            <div className="text-sm font-extrabold leading-tight" style={{ background: "linear-gradient(135deg, #a5b4fc, #818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                          <div className="min-w-0 flex-1">
+                            <div
+                              className="text-sm font-extrabold leading-tight truncate"
+                              style={{ background: "linear-gradient(135deg, #a5b4fc, #818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+                            >
                               {kpi.value}
                             </div>
-                            <div className="text-[10px] leading-tight truncate" style={{ color: "rgba(148,163,184,0.7)" }}>
+                            <div
+                              className="text-[10px] leading-tight break-words line-clamp-2"
+                              style={{ color: "rgba(148,163,184,0.7)" }}
+                            >
                               {kpi.label}
                             </div>
                           </div>
