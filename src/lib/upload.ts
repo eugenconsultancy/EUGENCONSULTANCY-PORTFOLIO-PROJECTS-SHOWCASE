@@ -1,29 +1,25 @@
-import { writeFile, mkdir, unlink } from "fs/promises";
-import path from "path";
-import { v4 as uuidv4 } from "uuid";
+// src/lib/upload.ts
+import { put, del } from "@vercel/blob";
 
+/**
+ * Uploads a service image to Vercel Blob and returns the public URL.
+ */
 export async function saveServiceImage(file: File): Promise<string> {
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    const ext = path.extname(file.name);
-    const filename = `${uuidv4()}${ext}`;
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "services");
-    const filePath = path.join(uploadDir, filename);
-
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(filePath, buffer);
-
-    return `/uploads/services/${filename}`;
+    const blob = await put(file.name, file, {
+        access: "public",
+        addRandomSuffix: true, // Prevents overwrites
+    });
+    return blob.url;
 }
 
-export async function deleteServiceImage(imageUrl: string): Promise<void> {
-    if (!imageUrl) return;
-    const filename = imageUrl.replace(/^\/uploads\/services\//, "");
-    const filePath = path.join(process.cwd(), "public", "uploads", "services", filename);
+/**
+ * Deletes a service image from Vercel Blob.
+ */
+export async function deleteServiceImage(url: string): Promise<void> {
+    if (!url) return;
     try {
-        await unlink(filePath);
+        await del(url);
     } catch {
-        // ignore if file doesn't exist
+        // Ignore if file is already gone or URL invalid
     }
 }

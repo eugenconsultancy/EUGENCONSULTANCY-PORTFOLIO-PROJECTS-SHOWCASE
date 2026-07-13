@@ -33,17 +33,25 @@ export async function CommentSection({ projectId }: { projectId: number }) {
           </p>
         </div>
 
-        {/* Stats Pills */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-full border border-gray-100 dark:border-gray-800">
-            <span className="text-lg">💬</span>
-            <span className="font-bold text-gray-900 dark:text-gray-200">{totalComments}</span>
-            <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">Comments</span>
+        {/* Stats Pills – fixed overflow */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-full border border-gray-100 dark:border-gray-800 min-w-0 overflow-hidden">
+            <span className="text-lg flex-shrink-0">💬</span>
+            <span className="font-bold text-gray-900 dark:text-gray-200 flex-shrink-0">
+              {totalComments}
+            </span>
+            <span className="text-xs text-gray-500 uppercase tracking-wider font-medium truncate">
+              Comments
+            </span>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-full border border-gray-100 dark:border-gray-800">
-            <span className="text-lg">👥</span>
-            <span className="font-bold text-gray-900 dark:text-gray-200">{contributors}</span>
-            <span className="text-xs text-gray-500 uppercase tracking-wider font-medium">Contributors</span>
+          <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-full border border-gray-100 dark:border-gray-800 min-w-0 overflow-hidden">
+            <span className="text-lg flex-shrink-0">👥</span>
+            <span className="font-bold text-gray-900 dark:text-gray-200 flex-shrink-0">
+              {contributors}
+            </span>
+            <span className="text-xs text-gray-500 uppercase tracking-wider font-medium truncate">
+              Contributors
+            </span>
           </div>
         </div>
       </div>
@@ -69,8 +77,15 @@ export async function CommentSection({ projectId }: { projectId: number }) {
 
       {/* Form Area */}
       <div className="mt-12">
-        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Leave a comment</h4>
-        <CommentForm projectId={projectId} num1={num1} num2={num2} token={token} />
+        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Leave a comment
+        </h4>
+        <CommentForm
+          projectId={projectId}
+          num1={num1}
+          num2={num2}
+          token={token}
+        />
       </div>
     </section>
   );
