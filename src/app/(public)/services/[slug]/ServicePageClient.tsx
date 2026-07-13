@@ -12,7 +12,7 @@ type ServiceMeta = {
     tagline: string;
     description: string;
     icon: string;
-    image: string | null;   // ✅ Added image
+    image: string | null;
 };
 
 interface ServicePageClientProps {
@@ -22,7 +22,6 @@ interface ServicePageClientProps {
     process: { step: string; desc: string }[];
     techStack: Record<string, string[]>;
     pricing: { name: string; price: string; features: string[] }[];
-    testimonials: { quote: string; author: string; role: string }[];
     faq: { q: string; a: string }[];
 }
 
@@ -248,18 +247,12 @@ const DEFAULT_FAQ = [
     { q: "Can you integrate AI into an existing product?", a: "Yes. We embed LLM APIs (OpenAI, Anthropic, Gemini), build retrieval-augmented generation (RAG) systems, and deploy ML models as microservices within your existing architecture." },
 ];
 
-const DEFAULT_TESTIMONIALS = [
-    { quote: "Exceptional engineering quality. The platform handled launch-day traffic with zero downtime and Core Web Vitals scores above 95.", author: "Dr. A. Mwangi", role: "Director, EdTech Startup" },
-    { quote: "The SPSS analysis and research dashboard were delivered ahead of schedule. The visualisations made our findings immediately clear to the board.", author: "Prof. J. Ochieng", role: "Head of Research, University of Nairobi" },
-    { quote: "Our organic traffic grew 340% in four months after the technical SEO audit and RankMath configuration. Tangible, measurable results.", author: "S. Kimani", role: "Founder, E-commerce Brand" },
-];
-
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
     return (
-        <p className="inline-flex items-center gap-2 text-xs font-black tracking-[0.2em] text-blue-600 dark:text-blue-400 uppercase mb-3">
-            <span className="w-6 h-px bg-blue-500" />
+        <p className="inline-flex items-center gap-2 text-xs font-black tracking-[0.2em] text-blue-600 dark:text-blue-400 uppercase mb-2">
+            <span className="w-5 h-px bg-blue-500" />
             {children}
         </p>
     );
@@ -277,17 +270,16 @@ function SectionHeading({
     light?: boolean;
 }) {
     return (
-        <div className={`mb-10 ${center ? "text-center" : ""}`}>
+        <div className={`mb-7 ${center ? "text-center" : ""}`}>
             <h2
-                className={`text-3xl md:text-4xl font-black tracking-tight leading-tight ${light ? "text-white" : "text-gray-900 dark:text-white"
+                className={`text-2xl md:text-3xl font-black tracking-tight leading-tight ${light ? "text-white" : "text-gray-900 dark:text-white"
                     }`}
             >
                 {children}
             </h2>
             {sub && (
                 <p
-                    className={`mt-3 text-base max-w-2xl leading-relaxed ${center ? "mx-auto" : ""
-                        } ${light ? "text-blue-100/80" : "text-gray-500 dark:text-gray-400"
+                    className={`mt-2 text-sm max-w-2xl leading-relaxed ${center ? "mx-auto" : ""} ${light ? "text-blue-100/80" : "text-gray-500 dark:text-gray-400"
                         }`}
                 >
                     {sub}
@@ -312,32 +304,29 @@ function Sparkline({ color }: { color: string }) {
 function FAQItem({ q, a }: { q: string; a: string }) {
     const [open, setOpen] = useState(false);
     return (
-        <div
-            className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden"
-            style={{ transition: "box-shadow 0.2s" }}
-        >
+        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
             <button
                 onClick={() => setOpen((v) => !v)}
-                className="w-full flex items-center justify-between px-6 py-5 text-left group"
+                className="w-full flex items-center justify-between px-5 py-4 text-left group"
                 aria-expanded={open}
             >
-                <span className="font-bold text-gray-900 dark:text-white text-sm md:text-base pr-4 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <span className="font-bold text-gray-900 dark:text-white text-sm pr-4 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {q}
                 </span>
                 <span
-                    className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300"
+                    className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300"
                     style={{
                         background: open ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "rgba(99,102,241,0.1)",
                         color: open ? "#fff" : "#6366f1",
                         transform: open ? "rotate(45deg)" : "none",
                     }}
                 >
-                    <span className="text-base font-black leading-none">+</span>
+                    <span className="text-sm font-black leading-none">+</span>
                 </span>
             </button>
             {open && (
                 <div
-                    className="px-6 pb-5 text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800 pt-4"
+                    className="px-5 pb-4 text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800 pt-3"
                     style={{ animation: "fadeDown 0.22s ease" }}
                 >
                     {a}
@@ -358,7 +347,7 @@ function PricingCard({
 }) {
     return (
         <div
-            className={`relative rounded-3xl p-8 flex flex-col transition-all duration-300 ${featured ? "shadow-2xl scale-105" : "hover:-translate-y-1 hover:shadow-xl"
+            className={`relative rounded-3xl p-7 flex flex-col transition-all duration-300 ${featured ? "shadow-2xl scale-105" : "hover:-translate-y-1 hover:shadow-xl"
                 }`}
             style={{
                 background: featured
@@ -383,13 +372,13 @@ function PricingCard({
                     </span>
                 </div>
             )}
-            <h3 className={`text-xl font-black mb-1 ${featured ? "text-white" : "text-gray-900 dark:text-white"}`}>
+            <h3 className={`text-lg font-black mb-1 ${featured ? "text-white" : "text-gray-900 dark:text-white"}`}>
                 {plan.name}
             </h3>
-            <p className={`text-3xl font-black mb-6 ${featured ? "text-indigo-300" : "text-blue-600 dark:text-blue-400"}`}>
+            <p className={`text-2xl font-black mb-5 ${featured ? "text-indigo-300" : "text-blue-600 dark:text-blue-400"}`}>
                 {plan.price}
             </p>
-            <ul className="space-y-3 mb-8 flex-1">
+            <ul className="space-y-2.5 mb-7 flex-1">
                 {plan.features.map((f, j) => (
                     <li
                         key={j}
@@ -428,6 +417,23 @@ function PricingCard({
     );
 }
 
+// ─── Hero Image component (shared between mobile & desktop) ───────────────────
+
+function HeroImage({ service }: { service: ServiceMeta }) {
+    return (
+        <div className="relative w-full rounded-2xl overflow-hidden" style={{ aspectRatio: "16/9" }}>
+            <Image
+                src={service.image!}
+                alt={service.name}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+                priority
+            />
+        </div>
+    );
+}
+
 // ─── Main client component ─────────────────────────────────────────────────────
 
 export default function ServicePageClient({
@@ -437,7 +443,6 @@ export default function ServicePageClient({
     process,
     techStack,
     pricing,
-    testimonials,
     faq,
 }: ServicePageClientProps) {
     const [activePipelineStep, setActivePipelineStep] = useState<number | null>(null);
@@ -454,7 +459,6 @@ export default function ServicePageClient({
             }))
             : DEFAULT_GAINS;
 
-    const displayTestimonials = testimonials.length > 0 ? testimonials : DEFAULT_TESTIMONIALS;
     const displayFaq = faq.length > 0 ? faq : DEFAULT_FAQ;
 
     const showAnalytics = true;
@@ -464,47 +468,49 @@ export default function ServicePageClient({
     return (
         <>
             <style>{`
-        @keyframes fadeDown {
-          from { opacity: 0; transform: translateY(-8px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes aurora1 {
-          0%, 100% { transform: translate(0,0) scale(1); }
-          50%       { transform: translate(60px,-40px) scale(1.15); }
-        }
-        @keyframes aurora2 {
-          0%, 100% { transform: translate(0,0) scale(1); }
-          50%       { transform: translate(-50px,30px) scale(1.1); }
-        }
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .fade-up { animation: fadeUp 0.65s ease both; }
-      `}</style>
+                @keyframes fadeDown {
+                    from { opacity: 0; transform: translateY(-8px); }
+                    to   { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes aurora1 {
+                    0%, 100% { transform: translate(0,0) scale(1); }
+                    50%       { transform: translate(60px,-40px) scale(1.15); }
+                }
+                @keyframes aurora2 {
+                    0%, 100% { transform: translate(0,0) scale(1); }
+                    50%       { transform: translate(-50px,30px) scale(1.1); }
+                }
+                @keyframes fadeUp {
+                    from { opacity: 0; transform: translateY(16px); }
+                    to   { opacity: 1; transform: translateY(0); }
+                }
+                .fade-up { animation: fadeUp 0.65s ease both; }
+            `}</style>
 
             <main className="overflow-x-hidden">
 
-                {/* ════════════════════════════════════════════════════════════════════
-            1. HERO — aurora gradient, authority positioning
-        ════════════════════════════════════════════════════════════════════ */}
+                {/* ═══════════════════════════════════════════════════════════
+                    1. HERO — responsive image on all screen sizes
+                ═══════════════════════════════════════════════════════════ */}
                 <section
-                    className="relative min-h-[88vh] flex items-center overflow-hidden"
+                    className="relative flex items-center overflow-hidden"
                     style={{
                         background: "linear-gradient(135deg, #0f0f1e 0%, #130a2e 45%, #0a1628 100%)",
+                        minHeight: "clamp(500px, 72vh, 820px)",
                     }}
                 >
+                    {/* Aurora blobs */}
                     <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
                         <div
-                            className="absolute top-1/4 left-1/4 w-[520px] h-[520px] rounded-full blur-[130px]"
+                            className="absolute top-1/4 left-1/4 w-[480px] h-[480px] rounded-full blur-[130px]"
                             style={{ background: "rgba(99,102,241,0.18)", animation: "aurora1 16s ease-in-out infinite" }}
                         />
                         <div
-                            className="absolute top-1/3 right-1/5 w-[420px] h-[420px] rounded-full blur-[120px]"
+                            className="absolute top-1/3 right-1/5 w-[380px] h-[380px] rounded-full blur-[120px]"
                             style={{ background: "rgba(139,92,246,0.14)", animation: "aurora2 20s ease-in-out infinite" }}
                         />
                         <div
-                            className="absolute bottom-1/4 left-1/3 w-[340px] h-[340px] rounded-full blur-[100px]"
+                            className="absolute bottom-1/4 left-1/3 w-[300px] h-[300px] rounded-full blur-[100px]"
                             style={{ background: "rgba(6,182,212,0.10)" }}
                         />
                         <div
@@ -516,10 +522,11 @@ export default function ServicePageClient({
                         />
                     </div>
 
-                    <div className="relative max-w-7xl mx-auto px-6 sm:px-8 py-28 w-full">
-                        <div className="grid md:grid-cols-2 gap-12 items-center">
-                            {/* Left: copy */}
-                            <div className="fade-up space-y-6">
+                    <div className="relative max-w-7xl mx-auto px-6 sm:px-8 py-14 md:py-20 w-full">
+                        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+
+                            {/* ── Left: copy ── */}
+                            <div className="fade-up space-y-5">
                                 <div
                                     className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold tracking-wide"
                                     style={{
@@ -536,46 +543,57 @@ export default function ServicePageClient({
                                 </div>
 
                                 <h1
-                                    className="text-5xl md:text-6xl font-black leading-[1.05] tracking-tight"
+                                    className="text-4xl sm:text-5xl md:text-6xl font-black leading-[1.05] tracking-tight"
                                     style={{
                                         background: "linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%)",
                                         WebkitBackgroundClip: "text",
                                         WebkitTextFillColor: "transparent",
                                     }}
                                 >
-                                    {service.icon && <span className="mr-3" style={{ WebkitTextFillColor: "initial" }}>{service.icon}</span>}
+                                    {service.icon && (
+                                        <span className="mr-3" style={{ WebkitTextFillColor: "initial" }}>
+                                            {service.icon}
+                                        </span>
+                                    )}
                                     {service.name}
                                 </h1>
 
                                 <p
-                                    className="text-lg leading-relaxed max-w-xl"
+                                    className="text-base leading-relaxed max-w-xl"
                                     style={{ color: "rgba(203,213,225,0.85)" }}
                                 >
                                     {service.tagline ||
                                         "Helping organizations transform raw data into business decisions, high-performance software, and measurable online growth."}
                                 </p>
 
+                                {/* ── MOBILE IMAGE: visible on sm/md, hidden on desktop ── */}
+                                {service.image && (
+                                    <div className="md:hidden w-full rounded-2xl overflow-hidden shadow-2xl">
+                                        <HeroImage service={service} />
+                                    </div>
+                                )}
+
                                 <div className="flex items-center gap-3">
                                     <div className="flex gap-0.5">
                                         {Array.from({ length: 5 }).map((_, i) => (
                                             <span
                                                 key={i}
-                                                className="text-lg"
+                                                className="text-base"
                                                 style={{ color: "#FBBF24", filter: "drop-shadow(0 0 4px rgba(251,191,36,0.5))" }}
                                             >
                                                 ★
                                             </span>
                                         ))}
                                     </div>
-                                    <span style={{ color: "rgba(148,163,184,0.8)", fontSize: "0.8rem", fontWeight: 600 }}>
+                                    <span style={{ color: "rgba(148,163,184,0.8)", fontSize: "0.78rem", fontWeight: 600 }}>
                                         Trusted Engineering Practices
                                     </span>
                                 </div>
 
-                                <div className="flex flex-wrap gap-3 pt-2">
+                                <div className="flex flex-wrap gap-3 pt-1">
                                     <Link
                                         href={`/contact?service=${service.slug}`}
-                                        className="px-7 py-3.5 rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5"
+                                        className="px-6 py-3 rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5"
                                         style={{
                                             background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
                                             color: "#fff",
@@ -586,7 +604,7 @@ export default function ServicePageClient({
                                     </Link>
                                     <Link
                                         href="/projects"
-                                        className="px-7 py-3.5 rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5"
+                                        className="px-6 py-3 rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5"
                                         style={{
                                             background: "rgba(255,255,255,0.06)",
                                             border: "1px solid rgba(255,255,255,0.12)",
@@ -599,9 +617,9 @@ export default function ServicePageClient({
                                 </div>
                             </div>
 
-                            {/* Right: feature list OR image */}
+                            {/* ── Right: DESKTOP panel (image or feature list) ── */}
                             <div
-                                className="hidden md:block rounded-3xl p-8"
+                                className="hidden md:block rounded-3xl p-6"
                                 style={{
                                     background: "rgba(255,255,255,0.03)",
                                     border: "1px solid rgba(255,255,255,0.08)",
@@ -609,34 +627,34 @@ export default function ServicePageClient({
                                 }}
                             >
                                 {service.image ? (
-                                    // ✅ Display uploaded image
-                                    <div className="relative w-full aspect-video rounded-2xl overflow-hidden">
-                                        <Image
-                                            src={service.image}
-                                            alt={service.name}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
+                                    /* ── DESKTOP IMAGE ── */
+                                    <HeroImage service={service} />
                                 ) : (
-                                    // Fallback: feature list
+                                    /* ── Fallback feature list ── */
                                     <>
                                         <p
-                                            className="text-xs font-black tracking-[0.2em] uppercase mb-5"
+                                            className="text-xs font-black tracking-[0.2em] uppercase mb-4"
                                             style={{ color: "rgba(129,140,248,0.7)" }}
                                         >
                                             {features.length > 0 ? "What's Included" : "Core Capabilities"}
                                         </p>
                                         <ul className="space-y-3">
-                                            {(features.length > 0 ? features : [
-                                                "End-to-end project delivery",
-                                                "Production-grade code quality",
-                                                "Security & performance built-in",
-                                                "Cloud-native deployment",
-                                                "Ongoing support & documentation",
-                                                "Weekly progress updates",
-                                            ]).map((f, i) => (
-                                                <li key={i} className="flex items-start gap-3 text-sm" style={{ color: "rgba(203,213,225,0.85)" }}>
+                                            {(features.length > 0
+                                                ? features
+                                                : [
+                                                    "End-to-end project delivery",
+                                                    "Production-grade code quality",
+                                                    "Security & performance built-in",
+                                                    "Cloud-native deployment",
+                                                    "Ongoing support & documentation",
+                                                    "Weekly progress updates",
+                                                ]
+                                            ).map((f, i) => (
+                                                <li
+                                                    key={i}
+                                                    className="flex items-start gap-3 text-sm"
+                                                    style={{ color: "rgba(203,213,225,0.85)" }}
+                                                >
                                                     <span
                                                         className="mt-0.5 w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-black"
                                                         style={{
@@ -658,25 +676,20 @@ export default function ServicePageClient({
                     </div>
                 </section>
 
-                {/* ────────────────────────────────
-            All other sections remain exactly the same
-            (Business Challenges, What You'll Gain, Tech Stack, etc.)
-            ──────────────────────────────── */}
-
                 {/* ═══ 2. BUSINESS CHALLENGES WE SOLVE ═══ */}
-                <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
+                <section className="py-12 bg-gray-50 dark:bg-gray-950/60">
                     <div className="max-w-7xl mx-auto px-6 sm:px-8">
                         <SectionLabel>Pain points</SectionLabel>
                         <SectionHeading sub="We understand the operational friction that holds businesses back. Here's what we fix.">
                             Business Challenges We Solve
                         </SectionHeading>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             {PAIN_POINTS.map((pain, i) => (
                                 <div
                                     key={i}
-                                    className="group flex items-start gap-4 rounded-2xl p-5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:border-blue-200 dark:hover:border-blue-800 hover:-translate-y-1 hover:shadow-lg transition-all duration-200"
+                                    className="group flex items-start gap-3 rounded-xl p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:border-blue-200 dark:hover:border-blue-800 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200"
                                 >
-                                    <span className="text-2xl flex-shrink-0 mt-0.5">{pain.icon}</span>
+                                    <span className="text-xl flex-shrink-0 mt-0.5">{pain.icon}</span>
                                     <p className="text-sm text-gray-700 dark:text-gray-300 font-medium leading-snug">
                                         {pain.text}
                                     </p>
@@ -687,17 +700,17 @@ export default function ServicePageClient({
                 </section>
 
                 {/* ═══ 3. WHAT YOU'LL GAIN ═══ */}
-                <section className="py-20 bg-white dark:bg-gray-950">
+                <section className="py-12 bg-white dark:bg-gray-950">
                     <div className="max-w-7xl mx-auto px-6 sm:px-8">
                         <SectionLabel>Outcomes</SectionLabel>
                         <SectionHeading sub="Every engagement is anchored to measurable business outcomes — not just deliverables.">
                             What You&apos;ll Gain
                         </SectionHeading>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {gainCards.map((card, i) => (
                                 <div
                                     key={i}
-                                    className="group relative rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-7 overflow-hidden hover:-translate-y-2 hover:shadow-2xl transition-all duration-300"
+                                    className="group relative rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 overflow-hidden hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
                                 >
                                     <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${card.gradient}`} />
                                     <div
@@ -708,14 +721,14 @@ export default function ServicePageClient({
                                     />
                                     <div className="relative">
                                         <div
-                                            className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${card.gradient} flex items-center justify-center text-2xl mb-5 shadow-lg transition-transform duration-300 group-hover:scale-110`}
+                                            className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center text-xl mb-4 shadow-md transition-transform duration-300 group-hover:scale-110`}
                                         >
                                             {card.icon}
                                         </div>
-                                        <h3 className="font-black text-gray-900 dark:text-white mb-3 text-base">
+                                        <h3 className="font-black text-gray-900 dark:text-white mb-2 text-sm">
                                             {card.title}
                                         </h3>
-                                        <ul className="space-y-2">
+                                        <ul className="space-y-1.5">
                                             {card.items.map((item, j) => (
                                                 <li key={j} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                                                     <span className="text-green-500 font-black text-xs">✓</span>
@@ -731,13 +744,13 @@ export default function ServicePageClient({
                 </section>
 
                 {/* ═══ 4. TECHNOLOGY BY DISCIPLINE ═══ */}
-                <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
+                <section className="py-12 bg-gray-50 dark:bg-gray-950/60">
                     <div className="max-w-7xl mx-auto px-6 sm:px-8">
                         <SectionLabel>Technical depth</SectionLabel>
                         <SectionHeading sub="Organised by discipline — not scattered lists. Every tool chosen for a reason.">
                             Technology Stack
                         </SectionHeading>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {(Object.keys(techStack).length > 0
                                 ? Object.entries(techStack).map(([label, tools], i) => ({
                                     label,
@@ -751,28 +764,25 @@ export default function ServicePageClient({
                             ).map((disc, i) => (
                                 <div
                                     key={i}
-                                    className="rounded-2xl p-6"
-                                    style={{
-                                        background: disc.bg,
-                                        border: `1px solid ${disc.border}`,
-                                    }}
+                                    className="rounded-xl p-5"
+                                    style={{ background: disc.bg, border: `1px solid ${disc.border}` }}
                                 >
-                                    <div className="flex items-center gap-3 mb-4">
+                                    <div className="flex items-center gap-3 mb-3">
                                         <div
-                                            className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"
+                                            className="w-8 h-8 rounded-lg flex items-center justify-center text-base"
                                             style={{ background: `${disc.color}22`, border: `1px solid ${disc.color}44` }}
                                         >
                                             {disc.icon}
                                         </div>
-                                        <h3 className="font-black text-base" style={{ color: disc.color }}>
+                                        <h3 className="font-black text-sm" style={{ color: disc.color }}>
                                             {disc.label}
                                         </h3>
                                     </div>
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="flex flex-wrap gap-1.5">
                                         {disc.tools.map((tool) => (
                                             <span
                                                 key={tool}
-                                                className="px-3 py-1.5 rounded-xl text-xs font-semibold"
+                                                className="px-2.5 py-1 rounded-lg text-xs font-semibold"
                                                 style={{
                                                     background: `${disc.color}11`,
                                                     border: `1px solid ${disc.color}30`,
@@ -791,20 +801,20 @@ export default function ServicePageClient({
 
                 {/* ═══ 5. DELIVERY PROCESS ═══ */}
                 {process.length > 0 && (
-                    <section className="py-20 bg-white dark:bg-gray-950">
+                    <section className="py-12 bg-white dark:bg-gray-950">
                         <div className="max-w-7xl mx-auto px-6 sm:px-8">
                             <SectionLabel>How we deliver</SectionLabel>
                             <SectionHeading sub="A structured, milestone-driven process with full transparency at every stage.">
                                 Delivery Process
                             </SectionHeading>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                 {process.map((step, i) => (
                                     <div
                                         key={i}
-                                        className="flex items-start gap-4 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-lg transition-all"
+                                        className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-md transition-all"
                                     >
                                         <span
-                                            className="flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black"
+                                            className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black"
                                             style={{
                                                 background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
                                                 color: "#fff",
@@ -813,7 +823,7 @@ export default function ServicePageClient({
                                             {String(i + 1).padStart(2, "0")}
                                         </span>
                                         <div>
-                                            <h3 className="font-black text-gray-900 dark:text-white text-sm mb-1">{step.step}</h3>
+                                            <h3 className="font-black text-gray-900 dark:text-white text-sm mb-0.5">{step.step}</h3>
                                             <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{step.desc}</p>
                                         </div>
                                     </div>
@@ -826,64 +836,61 @@ export default function ServicePageClient({
                 {/* ═══ 6. DATA ANALYTICS & DECISION INTELLIGENCE ═══ */}
                 {showAnalytics && (
                     <section
-                        className="py-20"
+                        className="py-12"
                         style={{
                             background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)",
                         }}
                     >
                         <div className="max-w-7xl mx-auto px-6 sm:px-8">
-                            <div className="text-center mb-12">
+                            <div className="text-center mb-8">
                                 <p
-                                    className="inline-flex items-center gap-2 text-xs font-black tracking-[0.2em] uppercase mb-3"
+                                    className="inline-flex items-center gap-2 text-xs font-black tracking-[0.2em] uppercase mb-2"
                                     style={{ color: "rgba(129,140,248,0.8)" }}
                                 >
-                                    <span className="w-6 h-px" style={{ background: "#818cf8" }} />
+                                    <span className="w-5 h-px" style={{ background: "#818cf8" }} />
                                     Decision Intelligence
                                 </p>
                                 <h2
-                                    className="text-3xl md:text-4xl font-black tracking-tight leading-tight"
+                                    className="text-2xl md:text-3xl font-black tracking-tight leading-tight"
                                     style={{
                                         background: "linear-gradient(135deg,#ffffff 30%,#a5b4fc 100%)",
                                         WebkitBackgroundClip: "text",
                                         WebkitTextFillColor: "transparent",
                                     }}
                                 >
-                                    Data Analytics &amp;<br />Decision Intelligence
+                                    Data Analytics &amp; Decision Intelligence
                                 </h2>
-                                <p className="mt-3 text-base max-w-xl mx-auto" style={{ color: "rgba(148,163,184,0.8)" }}>
+                                <p className="mt-2 text-sm max-w-xl mx-auto" style={{ color: "rgba(148,163,184,0.8)" }}>
                                     Transforming raw data into strategic decisions through rigorous statistical analysis and clear visualization.
                                 </p>
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {ANALYTICS_DISCIPLINES.map((disc, i) => (
                                     <div
                                         key={i}
-                                        className="group relative rounded-2xl p-6 overflow-hidden"
-                                        style={{
-                                            background: disc.bg,
-                                            border: `1px solid ${disc.border}`,
-                                        }}
+                                        className="group relative rounded-xl p-5 overflow-hidden"
+                                        style={{ background: disc.bg, border: `1px solid ${disc.border}` }}
                                     >
-                                        <div className="absolute bottom-3 right-3 pointer-events-none">
+                                        <div className="absolute bottom-2 right-2 pointer-events-none">
                                             <Sparkline color={disc.color} />
                                         </div>
                                         <div className="relative">
-                                            <div className="flex items-center gap-3 mb-4">
+                                            <div className="flex items-center gap-3 mb-3">
                                                 <div
-                                                    className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
+                                                    className="w-9 h-9 rounded-lg flex items-center justify-center text-lg"
                                                     style={{ background: `${disc.color}22`, border: `1px solid ${disc.color}44` }}
                                                 >
                                                     {disc.icon}
                                                 </div>
-                                                <h3 className="font-black text-base" style={{ color: disc.color }}>
+                                                <h3 className="font-black text-sm" style={{ color: disc.color }}>
                                                     {disc.title}
                                                 </h3>
                                             </div>
-                                            <div className="flex flex-wrap gap-2">
+                                            <div className="flex flex-wrap gap-1.5">
                                                 {disc.tools.map((tool) => (
                                                     <span
                                                         key={tool}
-                                                        className="px-3 py-1.5 rounded-xl text-xs font-semibold"
+                                                        className="px-2.5 py-1 rounded-lg text-xs font-semibold"
                                                         style={{
                                                             background: `${disc.color}11`,
                                                             border: `1px solid ${disc.color}30`,
@@ -904,7 +911,7 @@ export default function ServicePageClient({
 
                 {/* ═══ 7. SEO & DIGITAL GROWTH ═══ */}
                 {showSEO && (
-                    <section className="py-20 bg-white dark:bg-gray-950">
+                    <section className="py-12 bg-white dark:bg-gray-950">
                         <div className="max-w-7xl mx-auto px-6 sm:px-8">
                             <SectionLabel>Search visibility</SectionLabel>
                             <SectionHeading sub="A full-spectrum SEO operation — from technical foundations to continuous rank growth.">
@@ -912,13 +919,13 @@ export default function ServicePageClient({
                             </SectionHeading>
 
                             <div
-                                className="rounded-2xl p-6 mb-8"
+                                className="rounded-xl p-5 mb-6"
                                 style={{
                                     background: "linear-gradient(135deg, rgba(245,158,11,0.06) 0%, rgba(249,115,22,0.04) 100%)",
                                     border: "1px solid rgba(245,158,11,0.2)",
                                 }}
                             >
-                                <p className="text-xs font-black tracking-[0.15em] uppercase mb-5" style={{ color: "rgba(245,158,11,0.8)" }}>
+                                <p className="text-xs font-black tracking-[0.15em] uppercase mb-4" style={{ color: "rgba(245,158,11,0.8)" }}>
                                     SEO Workflow
                                 </p>
                                 <div className="flex flex-wrap items-center gap-2">
@@ -926,7 +933,7 @@ export default function ServicePageClient({
                                         <React.Fragment key={step}>
                                             <button
                                                 onClick={() => setActivePipelineStep(activePipelineStep === i ? null : i)}
-                                                className="px-4 py-2 rounded-xl text-sm font-bold transition-all"
+                                                className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
                                                 style={
                                                     activePipelineStep === i
                                                         ? {
@@ -945,7 +952,7 @@ export default function ServicePageClient({
                                                 {step}
                                             </button>
                                             {i < SEO_PIPELINE.length - 1 && (
-                                                <span className="font-bold text-sm" style={{ color: "rgba(245,158,11,0.4)" }}>
+                                                <span className="font-bold text-xs" style={{ color: "rgba(245,158,11,0.4)" }}>
                                                     ↓
                                                 </span>
                                             )}
@@ -954,7 +961,7 @@ export default function ServicePageClient({
                                 </div>
                                 {activePipelineStep !== null && (
                                     <div
-                                        className="mt-4 p-4 rounded-xl text-sm"
+                                        className="mt-3 p-3 rounded-lg text-xs"
                                         style={{
                                             background: "rgba(245,158,11,0.08)",
                                             border: "1px solid rgba(245,158,11,0.2)",
@@ -977,20 +984,20 @@ export default function ServicePageClient({
                                 )}
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                                 {SEO_CARDS.map((card, i) => (
                                     <div
                                         key={i}
-                                        className="rounded-2xl p-5 hover:-translate-y-1 hover:shadow-lg transition-all duration-200"
+                                        className="rounded-xl p-4 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200"
                                         style={{ background: card.bg, border: `1px solid ${card.border}` }}
                                     >
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <span className="text-xl">{card.icon}</span>
-                                            <h3 className="font-black text-sm" style={{ color: card.color }}>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="text-lg">{card.icon}</span>
+                                            <h3 className="font-black text-xs" style={{ color: card.color }}>
                                                 {card.title}
                                             </h3>
                                         </div>
-                                        <ul className="space-y-1.5">
+                                        <ul className="space-y-1">
                                             {card.items.map((item) => (
                                                 <li
                                                     key={item}
@@ -1010,17 +1017,17 @@ export default function ServicePageClient({
 
                 {/* ═══ 8. WORDPRESS ENGINEERING ═══ */}
                 {showWordPress && (
-                    <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
+                    <section className="py-12 bg-gray-50 dark:bg-gray-950/60">
                         <div className="max-w-7xl mx-auto px-6 sm:px-8">
                             <SectionLabel>CMS expertise</SectionLabel>
                             <SectionHeading sub="Full-spectrum WordPress engineering — from custom theme development to WooCommerce and performance hardening.">
                                 WordPress Engineering
                             </SectionHeading>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                                 {WP_CARDS.map((card, i) => (
                                     <div
                                         key={i}
-                                        className="group rounded-2xl p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:border-blue-200 dark:hover:border-blue-800 hover:-translate-y-1.5 hover:shadow-xl transition-all duration-200 overflow-hidden relative"
+                                        className="group rounded-xl p-5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 hover:border-blue-200 dark:hover:border-blue-800 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 overflow-hidden relative"
                                     >
                                         <div
                                             className="absolute top-0 left-0 right-0 h-0.5"
@@ -1028,8 +1035,8 @@ export default function ServicePageClient({
                                                 background: `linear-gradient(90deg, hsl(${220 + i * 15}, 80%, 55%), transparent)`,
                                             }}
                                         />
-                                        <span className="text-2xl mb-3 block">{card.icon}</span>
-                                        <h3 className="font-black text-gray-900 dark:text-white text-sm mb-2">{card.title}</h3>
+                                        <span className="text-xl mb-2 block">{card.icon}</span>
+                                        <h3 className="font-black text-gray-900 dark:text-white text-sm mb-1">{card.title}</h3>
                                         <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{card.desc}</p>
                                     </div>
                                 ))}
@@ -1040,13 +1047,13 @@ export default function ServicePageClient({
 
                 {/* ═══ 9. PRICING ═══ */}
                 {pricing.length > 0 && (
-                    <section className="py-20 bg-white dark:bg-gray-950">
+                    <section className="py-12 bg-white dark:bg-gray-950">
                         <div className="max-w-5xl mx-auto px-6 sm:px-8">
                             <SectionLabel>Pricing</SectionLabel>
                             <SectionHeading center sub="Transparent, fixed-scope pricing — no surprises, no hourly guesswork.">
                                 Investment Plans
                             </SectionHeading>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start mt-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start mt-4">
                                 {pricing.map((plan, i) => (
                                     <PricingCard
                                         key={i}
@@ -1060,71 +1067,14 @@ export default function ServicePageClient({
                     </section>
                 )}
 
-                {/* ═══ 10. GLASS TESTIMONIALS ═══ */}
-                <section
-                    className="py-20"
-                    style={{
-                        background: "linear-gradient(135deg, #0f0f1e 0%, #130a2e 100%)",
-                    }}
-                >
-                    <div className="max-w-7xl mx-auto px-6 sm:px-8">
-                        <div className="text-center mb-10">
-                            <p
-                                className="inline-flex items-center gap-2 text-xs font-black tracking-[0.2em] uppercase mb-3"
-                                style={{ color: "rgba(129,140,248,0.8)" }}
-                            >
-                                <span className="w-6 h-px" style={{ background: "#818cf8" }} />
-                                Client outcomes
-                            </p>
-                            <h2
-                                className="text-3xl md:text-4xl font-black tracking-tight"
-                                style={{
-                                    background: "linear-gradient(135deg,#ffffff 30%,#a5b4fc 100%)",
-                                    WebkitBackgroundClip: "text",
-                                    WebkitTextFillColor: "transparent",
-                                }}
-                            >
-                                What Clients Say
-                            </h2>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                            {displayTestimonials.slice(0, 3).map((t, i) => (
-                                <div
-                                    key={i}
-                                    className="flex flex-col gap-5 rounded-2xl p-7"
-                                    style={{
-                                        background: "rgba(255,255,255,0.04)",
-                                        border: "1px solid rgba(255,255,255,0.08)",
-                                        backdropFilter: "blur(16px)",
-                                        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                                    }}
-                                >
-                                    <div className="flex gap-0.5">
-                                        {Array.from({ length: 5 }).map((_, s) => (
-                                            <span key={s} style={{ color: "#FBBF24", fontSize: "0.85rem" }}>★</span>
-                                        ))}
-                                    </div>
-                                    <blockquote className="text-sm leading-relaxed flex-1" style={{ color: "rgba(203,213,225,0.9)" }}>
-                                        &ldquo;{t.quote}&rdquo;
-                                    </blockquote>
-                                    <div className="pt-4 border-t" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-                                        <p className="font-bold text-white text-sm">{t.author}</p>
-                                        <p className="text-xs mt-0.5" style={{ color: "rgba(148,163,184,0.7)" }}>{t.role}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                {/* ═══ 11. FAQ ═══ */}
-                <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
+                {/* ═══ 10. FAQ ═══ */}
+                <section className="py-12 bg-gray-50 dark:bg-gray-950/60">
                     <div className="max-w-3xl mx-auto px-6 sm:px-8">
                         <SectionLabel>Common questions</SectionLabel>
                         <SectionHeading center sub="Everything clients ask before starting a project.">
                             Frequently Asked Questions
                         </SectionHeading>
-                        <div className="space-y-3 mt-2">
+                        <div className="space-y-2 mt-2">
                             {displayFaq.map((item, i) => (
                                 <FAQItem key={i} q={item.q} a={item.a} />
                             ))}
@@ -1132,12 +1082,12 @@ export default function ServicePageClient({
                     </div>
                 </section>
 
-                {/* ═══ 12. FINAL CTA ═══ */}
-                <section className="py-20 bg-white dark:bg-gray-950">
+                {/* ═══ 11. FINAL CTA ═══ */}
+                <section className="py-12 bg-white dark:bg-gray-950">
                     <div className="max-w-5xl mx-auto px-6 sm:px-8">
                         <div
                             className="relative rounded-3xl overflow-hidden"
-                            style={{ boxShadow: "0 32px 64px -16px rgba(99,102,241,0.3)" }}
+                            style={{ boxShadow: "0 24px 48px -12px rgba(99,102,241,0.3)" }}
                         >
                             <div
                                 aria-hidden
@@ -1148,12 +1098,12 @@ export default function ServicePageClient({
                             />
                             <div
                                 aria-hidden
-                                className="absolute top-0 left-1/4 w-72 h-72 rounded-full blur-3xl pointer-events-none"
+                                className="absolute top-0 left-1/4 w-64 h-64 rounded-full blur-3xl pointer-events-none"
                                 style={{ background: "rgba(99,102,241,0.25)", animation: "aurora1 14s ease-in-out infinite" }}
                             />
                             <div
                                 aria-hidden
-                                className="absolute bottom-0 right-1/4 w-72 h-72 rounded-full blur-3xl pointer-events-none"
+                                className="absolute bottom-0 right-1/4 w-64 h-64 rounded-full blur-3xl pointer-events-none"
                                 style={{ background: "rgba(139,92,246,0.2)", animation: "aurora2 18s ease-in-out infinite" }}
                             />
                             <div
@@ -1165,13 +1115,13 @@ export default function ServicePageClient({
                                 }}
                             />
 
-                            <div className="relative py-20 px-8 md:px-16 grid md:grid-cols-2 gap-12 items-center">
+                            <div className="relative py-14 px-8 md:px-14 grid md:grid-cols-2 gap-10 items-center">
                                 <div>
-                                    <p className="text-xs font-black tracking-[0.25em] uppercase mb-4" style={{ color: "rgba(165,180,252,0.7)" }}>
+                                    <p className="text-xs font-black tracking-[0.25em] uppercase mb-3" style={{ color: "rgba(165,180,252,0.7)" }}>
                                         Ready to start?
                                     </p>
                                     <h2
-                                        className="text-4xl md:text-5xl font-black tracking-tight leading-tight mb-5"
+                                        className="text-3xl md:text-4xl font-black tracking-tight leading-tight mb-4"
                                         style={{
                                             background: "linear-gradient(135deg,#ffffff 30%,#a5b4fc 100%)",
                                             WebkitBackgroundClip: "text",
@@ -1180,21 +1130,21 @@ export default function ServicePageClient({
                                     >
                                         Let&apos;s Turn Your Ideas Into Measurable Results
                                     </h2>
-                                    <div className="flex flex-wrap gap-3 mt-8">
+                                    <div className="flex flex-wrap gap-3 mt-6">
                                         <Link
                                             href={`/contact?service=${service.slug}`}
-                                            className="px-8 py-4 rounded-xl font-black text-sm transition-all hover:-translate-y-0.5"
+                                            className="px-7 py-3.5 rounded-xl font-black text-sm transition-all hover:-translate-y-0.5"
                                             style={{
                                                 background: "#fff",
                                                 color: "#312e81",
-                                                boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
+                                                boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
                                             }}
                                         >
                                             Schedule Consultation
                                         </Link>
                                         <Link
                                             href="/projects"
-                                            className="px-8 py-4 rounded-xl font-black text-sm transition-all hover:-translate-y-0.5"
+                                            className="px-7 py-3.5 rounded-xl font-black text-sm transition-all hover:-translate-y-0.5"
                                             style={{
                                                 border: "2px solid rgba(255,255,255,0.25)",
                                                 color: "#e2e8f0",
@@ -1206,10 +1156,10 @@ export default function ServicePageClient({
                                 </div>
 
                                 <div>
-                                    <p className="text-xs font-black tracking-[0.15em] uppercase mb-4" style={{ color: "rgba(165,180,252,0.6)" }}>
+                                    <p className="text-xs font-black tracking-[0.15em] uppercase mb-3" style={{ color: "rgba(165,180,252,0.6)" }}>
                                         Whether you need
                                     </p>
-                                    <ul className="space-y-3">
+                                    <ul className="space-y-2.5">
                                         {[
                                             "Software Development",
                                             "Data Analytics",
@@ -1232,7 +1182,7 @@ export default function ServicePageClient({
                                             </li>
                                         ))}
                                     </ul>
-                                    <p className="mt-6 text-sm font-bold" style={{ color: "rgba(165,180,252,0.8)" }}>
+                                    <p className="mt-5 text-sm font-bold" style={{ color: "rgba(165,180,252,0.8)" }}>
                                         — we&apos;re ready to help.
                                     </p>
                                 </div>

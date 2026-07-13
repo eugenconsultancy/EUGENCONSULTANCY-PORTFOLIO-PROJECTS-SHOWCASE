@@ -52,11 +52,8 @@ export default async function ServiceDetailPage({ params }: Props) {
     ? [{ title: "Key Benefits", items: benefitsRaw }]
     : benefitsRaw;
 
-  const testimonials = service.testimonials.map((t) => ({
-    quote: t.quote,
-    author: t.clientName,
-    role: t.company || "Client",
-  }));
+  // testimonials are no longer used by the new client component, so we can remove them
+  // const testimonials = service.testimonials.map(...)  <-- removed
 
   return (
     <ServicePageClient
@@ -66,7 +63,6 @@ export default async function ServiceDetailPage({ params }: Props) {
       process={process}
       techStack={{}}
       pricing={pricing}
-      testimonials={testimonials}
       faq={[]}
     />
   );
