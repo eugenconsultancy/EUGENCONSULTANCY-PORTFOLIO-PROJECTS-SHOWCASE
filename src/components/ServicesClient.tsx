@@ -13,6 +13,7 @@ type Service = {
     summary: string;
     description: string;
     icon: string;
+    image?: string | null;   // ✅ ADDED
     features: string;
     tools: string;
     benefits: string;
@@ -95,8 +96,8 @@ export function ServicesClient({ services }: ServicesClientProps) {
                                 key={category}
                                 onClick={() => setSelectedCategory(category)}
                                 className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${selectedCategory === category
-                                        ? "bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-lg shadow-blue-500/30"
-                                        : "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-blue-300 dark:hover:border-blue-700"
+                                    ? "bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-lg shadow-blue-500/30"
+                                    : "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-blue-300 dark:hover:border-blue-700"
                                     }`}
                             >
                                 {category}
@@ -128,12 +129,23 @@ export function ServicesClient({ services }: ServicesClientProps) {
                                     key={service.id}
                                     variants={itemVariants}
                                     className={`group relative rounded-3xl border transition-all duration-500 ${isExpanded
-                                            ? "border-blue-300 dark:border-blue-700 shadow-2xl"
-                                            : "border-gray-100 dark:border-gray-800 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-800"
+                                        ? "border-blue-300 dark:border-blue-700 shadow-2xl"
+                                        : "border-gray-100 dark:border-gray-800 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-800"
                                         } bg-white dark:bg-gray-900 overflow-hidden`}
                                 >
                                     {/* Gradient Top Bar */}
                                     <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 via-violet-600 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                                    {/* ✅ Service Image (if available) */}
+                                    {service.image && (
+                                        <div className="relative w-full h-48 overflow-hidden">
+                                            <img
+                                                src={service.image}
+                                                alt={service.title}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            />
+                                        </div>
+                                    )}
 
                                     <div className="p-8">
                                         {/* Header */}

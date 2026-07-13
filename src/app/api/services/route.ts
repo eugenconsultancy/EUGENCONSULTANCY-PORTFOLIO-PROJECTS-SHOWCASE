@@ -15,6 +15,7 @@ export async function GET() {
                 summary: true,
                 description: true,
                 icon: true,
+                image: true,        // ✅ ADDED
                 features: true,
                 tools: true,
                 benefits: true,
