@@ -52,7 +52,7 @@ export default async function ServiceDetailPage({ params }: Props) {
     ? [{ title: "Key Benefits", items: benefitsRaw }]
     : benefitsRaw;
 
-  // testimonials are no longer used by the new client component, so we can remove them
+  // testimonials are no longer used by the new client component, so i have removed them
   // const testimonials = service.testimonials.map(...)  <-- removed
 
   return (

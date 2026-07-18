@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { ProfileSettingsForm } from "@/components/ProfileSettingsForm";
+import { CertificationsManager } from "@/components/CertificationsManager";
 import Image from "next/image";
 
 export default async function SettingsPage() {
@@ -50,6 +51,10 @@ export default async function SettingsPage() {
 
       <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
         <ProfileSettingsForm profile={profile} />
+      </div>
+
+      <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+        <CertificationsManager />
       </div>
     </div>
   );

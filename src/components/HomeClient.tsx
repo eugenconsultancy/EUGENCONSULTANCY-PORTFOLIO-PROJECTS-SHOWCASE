@@ -68,42 +68,12 @@ const TRUST_BADGES = [
 ];
 
 const SERVICES = [
-  {
-    icon: "⚡",
-    title: "Web Applications",
-    desc: "Full-stack platforms with Next.js, Django, and FastAPI — built for performance, scale, and long-term maintainability.",
-    gradient: "from-blue-600 to-cyan-500",
-  },
-  {
-    icon: "📱",
-    title: "Mobile Applications",
-    desc: "Cross-platform mobile apps with Flutter and React Native, from MVP to production-ready native experiences.",
-    gradient: "from-violet-600 to-purple-500",
-  },
-  {
-    icon: "☁️",
-    title: "Cloud & DevOps",
-    desc: "AWS, Docker, Nginx, and GitHub Actions CI/CD pipelines — production-hardened infrastructure and zero-downtime deploys.",
-    gradient: "from-indigo-600 to-violet-600",
-  },
-  {
-    icon: "📊",
-    title: "Data Analytics & SPSS",
-    desc: "Statistical analysis, SPSS, Python data pipelines, academic research support, and business intelligence dashboards.",
-    gradient: "from-emerald-600 to-teal-600",
-  },
-  {
-    icon: "🔍",
-    title: "Technical SEO",
-    desc: "Core Web Vitals, schema markup, technical audits, Ahrefs analysis, and search engine indexation strategy.",
-    gradient: "from-amber-600 to-orange-500",
-  },
-  {
-    icon: "🤖",
-    title: "AI & Automation",
-    desc: "Embed ML models, LLM APIs, and intelligent automation into your existing product stack.",
-    gradient: "from-rose-600 to-pink-600",
-  },
+  { icon: "⚡", title: "Web Applications", desc: "Full-stack platforms with Next.js, Django, and FastAPI — built for performance, scale, and long-term maintainability.", gradient: "from-blue-600 to-cyan-500" },
+  { icon: "📱", title: "Mobile Applications", desc: "Cross-platform mobile apps with Flutter and React Native, from MVP to production-ready native experiences.", gradient: "from-violet-600 to-purple-500" },
+  { icon: "☁️", title: "Cloud & DevOps", desc: "AWS, Docker, Nginx, and GitHub Actions CI/CD pipelines — production-hardened infrastructure and zero-downtime deploys.", gradient: "from-indigo-600 to-violet-600" },
+  { icon: "📊", title: "Data Analytics & SPSS", desc: "Statistical analysis, SPSS, Python data pipelines, academic research support, and business intelligence dashboards.", gradient: "from-emerald-600 to-teal-600" },
+  { icon: "🔍", title: "Technical SEO", desc: "Core Web Vitals, schema markup, technical audits, Ahrefs analysis, and search engine indexation strategy.", gradient: "from-amber-600 to-orange-500" },
+  { icon: "🤖", title: "AI & Automation", desc: "Embed ML models, LLM APIs, and intelligent automation into your existing product stack.", gradient: "from-rose-600 to-pink-600" },
 ];
 
 const PROCESS_STEPS = [
@@ -191,59 +161,6 @@ const ANALYTICS_TOOLS = [
   { icon: "🐍", name: "Python", tags: ["Pandas", "NumPy", "SciPy", "Statsmodels"] },
   { icon: "📈", name: "Visualization", tags: ["Matplotlib", "Plotly", "Power BI", "Excel Dashboards"] },
   { icon: "🤖", name: "Machine Learning", tags: ["scikit-learn", "Classification", "Regression", "Clustering"] },
-];
-
-const STATUS_STYLES: Record<string, { bg: string; text: string; border: string; dot: string }> = {
-  Active: {
-    bg: "rgba(16,185,129,0.12)",
-    text: "#34d399",
-    border: "rgba(16,185,129,0.3)",
-    dot: "#10b981",
-  },
-  Completed: {
-    bg: "rgba(99,102,241,0.12)",
-    text: "#a5b4fc",
-    border: "rgba(99,102,241,0.3)",
-    dot: "#818cf8",
-  },
-};
-
-const CERTIFICATIONS_DATA = [
-  {
-    name: "Certified Web Professional — Web Developer (CWP)",
-    issuer: "World Organization of Webmasters",
-    status: "Active",
-    icon: "🌐",
-    accent: "#3B82F6",
-  },
-  {
-    name: "Flutter Dart Certified Professional",
-    issuer: "Kenya School of IT",
-    status: "Active",
-    icon: "📱",
-    accent: "#06B6D4",
-  },
-  {
-    name: "Django REST Framework — Advanced API Development",
-    issuer: "Udemy",
-    status: "Completed",
-    icon: "🎸",
-    accent: "#10B981",
-  },
-  {
-    name: "Vue.js 3 — Complete Developer Course",
-    issuer: "Udemy",
-    status: "Completed",
-    icon: "💚",
-    accent: "#84CC16",
-  },
-  {
-    name: "Tornado & Tkinter Developer Course",
-    issuer: "Emobilis Technology College",
-    status: "Completed",
-    icon: "🌪️",
-    accent: "#8B5CF6",
-  },
 ];
 
 // ─── Utility hooks ────────────────────────────────────────────────────────────
@@ -482,10 +399,11 @@ function DeploymentJourney() {
           <React.Fragment key={step.name}>
             <button
               onClick={() => setActive(active === i ? null : i)}
-              className={`group flex flex-col items-center text-center p-4 rounded-2xl transition-all duration-200 min-w-[100px] ${active === i
-                ? "bg-gradient-to-br from-blue-600 to-violet-600 text-white shadow-xl shadow-blue-500/30 scale-105"
-                : "bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:border-blue-300 hover:shadow-lg dark:hover:border-blue-700"
-                }`}
+              className={`group flex flex-col items-center text-center p-4 rounded-2xl transition-all duration-200 min-w-[100px] ${
+                active === i
+                  ? "bg-gradient-to-br from-blue-600 to-violet-600 text-white shadow-xl shadow-blue-500/30 scale-105"
+                  : "bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:border-blue-300 hover:shadow-lg dark:hover:border-blue-700"
+              }`}
             >
               <span className="text-2xl mb-1.5">{step.icon}</span>
               <span className="text-xs font-bold leading-tight">{step.name}</span>
@@ -815,10 +733,21 @@ function ProcessSection() {
   );
 }
 
-// ─── Premium certifications ───────────────────────────────────────────────────
-function CertificationsSection({ dbCerts }: { dbCerts: Certification[] }) {
-  const hardcodedNames = CERTIFICATIONS_DATA.map((c) => c.name.toLowerCase());
-  const extraDbCerts = dbCerts.filter((c) => !hardcodedNames.includes(c.name.toLowerCase()));
+// ─── Certifications section ─── now fully driven by DB data
+function CertificationsSection({ certifications }: { certifications: Certification[] }) {
+  if (!certifications || certifications.length === 0) {
+    return (
+      <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 text-center">
+          <SectionLabel>Credentials</SectionLabel>
+          <SectionHeading sub="Verified professional certifications will appear here once added.">
+            Certifications
+          </SectionHeading>
+          <p className="text-gray-500 dark:text-gray-400">No certifications yet. Add them via the admin panel.</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
@@ -827,81 +756,53 @@ function CertificationsSection({ dbCerts }: { dbCerts: Certification[] }) {
         <SectionHeading sub="Verified professional certifications from globally recognised institutions.">
           Certifications
         </SectionHeading>
-
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {CERTIFICATIONS_DATA.map((cert, i) => {
-            const statusStyle = STATUS_STYLES[cert.status] ?? STATUS_STYLES["Completed"];
-            const isWide = i === 0;
+          {certifications.map((cert) => {
+            // Pick an icon based on title or a default
+            const icon = "🏆";
+            const accent = "#3B82F6"; // you can randomise if needed
             return (
               <div
-                key={cert.name}
-                className={`group relative rounded-2xl p-6 flex flex-col gap-4 hover:-translate-y-1 hover:shadow-xl transition-all duration-200 overflow-hidden ${isWide ? "md:col-span-2 xl:col-span-1" : ""}`}
+                key={cert.id}
+                className="group relative rounded-2xl p-6 flex flex-col gap-4 hover:-translate-y-1 hover:shadow-xl transition-all duration-200 overflow-hidden"
                 style={{
-                  background: `linear-gradient(135deg, ${cert.accent}0d 0%, rgba(15,23,42,0.02) 100%)`,
-                  border: `1px solid ${cert.accent}30`,
+                  background: `linear-gradient(135deg, ${accent}0d 0%, rgba(15,23,42,0.02) 100%)`,
+                  border: `1px solid ${accent}30`,
                 }}
               >
                 <div
                   className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl"
-                  style={{ background: `linear-gradient(90deg, ${cert.accent}, ${cert.accent}44)` }}
-                />
-                <div
-                  className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                  style={{ background: `radial-gradient(circle, ${cert.accent}18 0%, transparent 70%)` }}
+                  style={{ background: `linear-gradient(90deg, ${accent}, ${accent}44)` }}
                 />
                 <div className="flex items-start gap-4">
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0 shadow-md"
                     style={{
-                      background: `linear-gradient(135deg, ${cert.accent}33, ${cert.accent}18)`,
-                      border: `1px solid ${cert.accent}40`,
+                      background: `linear-gradient(135deg, ${accent}33, ${accent}18)`,
+                      border: `1px solid ${accent}40`,
                     }}
                   >
-                    {cert.icon}
+                    {icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span
-                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold mb-2"
-                      style={{ background: statusStyle.bg, color: statusStyle.text, border: `1px solid ${statusStyle.border}` }}
-                    >
-                      <span
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{ background: statusStyle.dot }}
-                      />
-                      {cert.status}
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold mb-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-300 dark:border-green-800">
+                      Verified
                     </span>
                     <h3 className="font-black text-gray-900 dark:text-white text-sm leading-snug">{cert.name}</h3>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">{cert.issuer}</p>
+                    {cert.url && (
+                      <a
+                        href={cert.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block mt-2 text-xs text-blue-600 hover:underline font-semibold"
+                      >
+                        Verify →
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>
-            );
-          })}
-
-          {extraDbCerts.map((cert) => {
-            const statusStyle = STATUS_STYLES["Completed"];
-            return (
-              <a
-                key={cert.id}
-                href={cert.url ?? "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-4 px-5 py-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
-              >
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-md shadow-orange-200 dark:shadow-orange-900/30">
-                  <span className="text-lg">🏅</span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-gray-900 dark:text-white leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{cert.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{cert.issuer}{cert.year ? ` · ${cert.year}` : ""}</p>
-                </div>
-                <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold flex-shrink-0"
-                  style={{ background: statusStyle.bg, color: statusStyle.text, border: `1px solid ${statusStyle.border}` }}
-                >
-                  Completed
-                </span>
-              </a>
             );
           })}
         </div>
@@ -965,7 +866,7 @@ export function HomeClient({
 
       <main className="overflow-x-hidden">
 
-        {/* ═══ 1. HERO ═══ */}
+        {/* HERO */}
         <section className="relative min-h-screen flex items-center overflow-hidden bg-white dark:bg-gray-950">
           <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
             <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-blue-400/15 dark:bg-blue-600/10 blur-[120px]" style={{ animation: "aurora1 14s ease-in-out infinite" }} />
@@ -1060,7 +961,7 @@ export function HomeClient({
           </div>
         </section>
 
-        {/* ═══ 2. STATISTICS STRIP ═══ */}
+        {/* STATISTICS STRIP */}
         <section className="border-y border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50">
           <div className="max-w-5xl mx-auto px-6">
             <div ref={statsSection.ref} className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100 dark:divide-gray-800">
@@ -1071,12 +972,12 @@ export function HomeClient({
           </div>
         </section>
 
-        {/* ═══ 3. LATEST PROJECTS ═══ */}
+        {/* LATEST PROJECTS */}
         {latestProjects.length > 0 && (
           <LatestProjectsGrid projects={latestProjects} />
         )}
 
-        {/* ═══ 4. PROFESSIONAL IDENTITY ═══ */}
+        {/* PROFESSIONAL IDENTITY */}
         <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
           <div className="max-w-7xl mx-auto px-6 sm:px-8">
             <SectionLabel>Who we are</SectionLabel>
@@ -1119,7 +1020,7 @@ export function HomeClient({
           </div>
         </section>
 
-        {/* ═══ 5. FEATURED SERVICES ═══ */}
+        {/* FEATURED SERVICES */}
         <section className="py-20 bg-white dark:bg-gray-950">
           <div className="max-w-7xl mx-auto px-6 sm:px-8">
             <SectionLabel>What we offer</SectionLabel>
@@ -1144,13 +1045,13 @@ export function HomeClient({
           </div>
         </section>
 
-        {/* ═══ 6. SEO & DATA ANALYTICS ═══ */}
+        {/* SEO & DATA ANALYTICS */}
         <SeoAnalyticsSection />
 
-        {/* ═══ 7. HOW WE BUILD SOFTWARE ═══ */}
+        {/* HOW WE BUILD SOFTWARE */}
         <ProcessSection />
 
-        {/* ═══ 8. FROM CODE TO CLOUD ═══ */}
+        {/* FROM CODE TO CLOUD */}
         <section className="py-20 bg-white dark:bg-gray-950">
           <div className="max-w-7xl mx-auto px-6 sm:px-8">
             <SectionLabel>How we ship</SectionLabel>
@@ -1161,7 +1062,7 @@ export function HomeClient({
           </div>
         </section>
 
-        {/* ═══ 9. TECHNOLOGY ECOSYSTEM ═══ */}
+        {/* TECHNOLOGY ECOSYSTEM */}
         <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
           <div className="max-w-4xl mx-auto px-6 sm:px-8 text-center">
             <SectionLabel>Our stack</SectionLabel>
@@ -1172,7 +1073,7 @@ export function HomeClient({
           </div>
         </section>
 
-        {/* ═══ 10. PROJECT ARCHIVE ═══ */}
+        {/* PROJECT ARCHIVE */}
         {featuredProjects.length > 0 && (
           <section className="py-20 bg-white dark:bg-gray-950">
             <div className="max-w-7xl mx-auto px-6 sm:px-8 mb-10">
@@ -1192,7 +1093,7 @@ export function HomeClient({
           </section>
         )}
 
-        {/* ═══ 11. WHY CHOOSE US ═══ */}
+        {/* WHY CHOOSE US */}
         <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
           <div className="max-w-7xl mx-auto px-6 sm:px-8">
             <SectionLabel>Our edge</SectionLabel>
@@ -1215,10 +1116,10 @@ export function HomeClient({
           </div>
         </section>
 
-        {/* ═══ 12. CERTIFICATIONS ═══ */}
-        <CertificationsSection dbCerts={certifications} />
+        {/* CERTIFICATIONS */}
+        <CertificationsSection certifications={certifications} />
 
-        {/* ═══ 13. AVAILABILITY ═══ */}
+        {/* AVAILABILITY */}
         {profile.availability && (
           <section className="py-16 bg-white dark:bg-gray-950">
             <div className="max-w-3xl mx-auto px-6 sm:px-8">
@@ -1234,7 +1135,7 @@ export function HomeClient({
           </section>
         )}
 
-        {/* ═══ 14. FINAL CTA ═══ */}
+        {/* FINAL CTA */}
         <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
           <div className="max-w-7xl mx-auto px-6 sm:px-8">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl">
