@@ -244,7 +244,7 @@ export default async function AnalyticsPage({
   );
 }
 
-// ── Growth card ──
+// ── Growth card step by step procudure──
 function CardWithGrowth({ title, value, growth }: { title: string; value: number; growth: number }) {
   const isPositive = growth >= 0;
   return (
