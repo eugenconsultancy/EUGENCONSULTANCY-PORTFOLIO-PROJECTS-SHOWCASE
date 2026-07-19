@@ -6,16 +6,23 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 import {
   ArrowUpRight,
   ChevronDown,
-  ChevronUp,
   AlertTriangle,
   Building2,
   Sparkles,
   ExternalLink,
-  Github,
   ChevronLeft,
   ChevronRight,
   X,
 } from "lucide-react";
+
+// ─── Inline GitHub icon (lucide-react doesn't export 'Github' in your version) ──
+function GithubIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+    </svg>
+  );
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -30,13 +37,10 @@ type Props = {
   metrics: string;
   beforeImage?: string;
   afterImage?: string;
-  // Hero / CTA props (optional – supply from project detail page)
   liveUrl?: string;
   githubUrl?: string;
   projectId?: number;
-  // Gallery images (optional array of { src, alt })
   galleryImages?: { src: string; alt?: string }[];
-  // KPI cards to show in the hero metric strip (max 4)
   heroKpis?: { label: string; value: string }[];
 };
 
@@ -132,7 +136,6 @@ function ReactionButtons({
 
   const toggle = useCallback(
     async (type: ReactionType) => {
-      // Optimistic update
       setState((prev) => ({
         ...prev,
         [type]: {
@@ -141,7 +144,6 @@ function ReactionButtons({
         },
       }));
 
-      // Fire-and-forget API call (adjust endpoint to your route)
       if (projectId) {
         try {
           await fetch(`/api/projects/${projectId}/reactions`, {
@@ -150,7 +152,6 @@ function ReactionButtons({
             body: JSON.stringify({ type }),
           });
         } catch {
-          // revert on error
           setState((prev) => ({
             ...prev,
             [type]: {
@@ -202,7 +203,6 @@ function ImageGallery({ images }: { images: { src: string; alt?: string }[] }) {
   const prev = () => setCurrent((c) => (c - 1 + images.length) % images.length);
   const next = () => setCurrent((c) => (c + 1) % images.length);
 
-  // Touch swipe handlers
   const onTouchStart = (e: React.TouchEvent) => {
     startX.current = e.touches[0].clientX;
   };
@@ -256,8 +256,7 @@ function ImageGallery({ images }: { images: { src: string; alt?: string }[] }) {
                 <button
                   key={i}
                   onClick={() => setCurrent(i)}
-                  className={`w-1.5 h-1.5 rounded-full transition-all ${i === current ? "bg-blue-500 w-4" : "bg-gray-300 dark:bg-gray-600"
-                    }`}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${i === current ? "bg-blue-500 w-4" : "bg-gray-300 dark:bg-gray-600"}`}
                 />
               ))}
             </div>
@@ -311,7 +310,11 @@ function ImageGallery({ images }: { images: { src: string; alt?: string }[] }) {
             {lightbox > 0 && (
               <button
                 className="absolute left-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
-                onClick={(e) => { e.stopPropagation(); setCurrent((lightbox - 1 + images.length) % images.length); setLightbox((lightbox - 1 + images.length) % images.length); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrent((lightbox - 1 + images.length) % images.length);
+                  setLightbox((lightbox - 1 + images.length) % images.length);
+                }}
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
@@ -334,7 +337,11 @@ function ImageGallery({ images }: { images: { src: string; alt?: string }[] }) {
             {lightbox < images.length - 1 && (
               <button
                 className="absolute right-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
-                onClick={(e) => { e.stopPropagation(); setLightbox((lightbox + 1) % images.length); setCurrent((lightbox + 1) % images.length); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightbox((lightbox + 1) % images.length);
+                  setCurrent((lightbox + 1) % images.length);
+                }}
               >
                 <ChevronRight className="w-6 h-6" />
               </button>
@@ -408,7 +415,6 @@ export function CaseStudySection({
   const [activePhase, setActivePhase] = useState<string | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-80px" });
-  // Sticky CTA bar visibility – show after scrolling past hero
   const heroRef = useRef<HTMLDivElement>(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
 
@@ -472,7 +478,7 @@ export function CaseStudySection({
 
   return (
     <>
-      {/* ── Sticky CTA bar (desktop only, fades in after hero scrolls away) ── */}
+      {/* ── Sticky CTA bar (desktop only) ── */}
       <AnimatePresence>
         {showStickyBar && (liveUrl || githubUrl) && (
           <motion.div
@@ -500,7 +506,7 @@ export function CaseStudySection({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                <Github className="w-3.5 h-3.5" />
+                <GithubIcon size={14} />
                 GitHub
               </a>
             )}
@@ -515,7 +521,7 @@ export function CaseStudySection({
         animate={isInView ? "visible" : "hidden"}
         variants={containerVariants}
       >
-        {/* ── Hero KPI strip + CTA row (anchor for sticky bar sentinel) ── */}
+        {/* ── Hero KPI strip + CTA row ── */}
         {(heroKpis?.length || liveUrl || githubUrl) && (
           <motion.div
             ref={heroRef}
@@ -543,7 +549,7 @@ export function CaseStudySection({
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
-                    <Github className="w-4 h-4" />
+                    <GithubIcon size={14} />
                     GitHub
                   </a>
                 )}
@@ -567,12 +573,11 @@ export function CaseStudySection({
           </p>
         </motion.div>
 
-        {/* ── Phase stepper (desktop: horizontal, mobile: vertical accordion) ── */}
+        {/* ── Phase stepper ── */}
 
         {/* Desktop horizontal */}
         <motion.div variants={itemVariants} className="hidden lg:block">
           <div className="relative">
-            {/* connecting line */}
             <div className="absolute top-8 left-[16%] right-[16%] h-px bg-gradient-to-r from-red-400 via-blue-400 to-emerald-400 opacity-40" />
             <div className="grid grid-cols-3 gap-6">
               {phases.map((phase) => (
@@ -583,13 +588,11 @@ export function CaseStudySection({
                   onHoverStart={() => setActivePhase(phase.label)}
                   onHoverEnd={() => setActivePhase(null)}
                 >
-                  {/* badge */}
                   <div
                     className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${phase.gradient} flex items-center justify-center shadow-lg mb-4 relative z-10 transition-transform duration-200 ${activePhase === phase.label ? "scale-110" : ""}`}
                   >
                     <span className="text-white font-black text-xl">{phase.number}</span>
                   </div>
-                  {/* card */}
                   <div
                     className={`w-full rounded-2xl border ${phase.border} bg-gradient-to-br ${phase.bg} p-5 transition-all duration-300 hover:shadow-xl`}
                   >
@@ -617,7 +620,6 @@ export function CaseStudySection({
               animate={isInView ? { opacity: 1, x: 0 } : {}}
               transition={{ delay: index * 0.15 }}
             >
-              {/* step dot + line */}
               <div className="flex flex-col items-center pt-1 shrink-0">
                 <div
                   className={`w-10 h-10 rounded-xl bg-gradient-to-br ${phase.gradient} flex items-center justify-center shadow-md`}
@@ -629,7 +631,6 @@ export function CaseStudySection({
                 )}
               </div>
 
-              {/* expandable card */}
               <div
                 className={`flex-1 mb-3 rounded-2xl border ${phase.border} bg-gradient-to-br ${phase.bg} overflow-hidden`}
               >
@@ -665,9 +666,6 @@ export function CaseStudySection({
             </motion.div>
           ))}
         </motion.div>
-
-        {/* ── 2-column grid: Tech Stack + Dependencies ── */}
-        {/* (slot for parent to inject these via Accordion below) */}
 
         {/* ── Key metrics ── */}
         {metricLines.length > 0 && (
