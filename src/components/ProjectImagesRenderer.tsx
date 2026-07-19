@@ -5,7 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import rehypeSlug from "rehype-slug";
-import rehypeRaw from "rehype-raw"; // ✅ Enables raw HTML in markdown
+import rehypeRaw from "rehype-raw";
 import { Lightbox } from "./Lightbox";
 import { ZoomIn } from "lucide-react";
 import { CodeModal } from "./CodeModal";
@@ -21,6 +21,17 @@ type CodeRendererProps = {
   children?: React.ReactNode;
   inline?: boolean;
 };
+
+// ── Responsive table wrapper ──
+function ResponsiveTable({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="my-6 w-full overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-sm">
+        {children}
+      </table>
+    </div>
+  );
+}
 
 export function ProjectImagesRenderer({
   content,
@@ -104,12 +115,27 @@ export function ProjectImagesRenderer({
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[
             rehypeHighlight,
-            rehypeSlug,   // adds IDs to headings
-            rehypeRaw,    // ✅ renders raw HTML (like <div style="...">)
+            rehypeSlug,
+            rehypeRaw,
           ]}
           components={{
             code: CodeRenderer,
             img: ImageRenderer,
+            // ── Table overrides ──
+            table: ({ children }) => <ResponsiveTable>{children}</ResponsiveTable>,
+            thead: ({ children }) => (
+              <thead className="bg-gray-50 dark:bg-gray-800/50">{children}</thead>
+            ),
+            th: ({ children }) => (
+              <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-gray-100">
+                {children}
+              </th>
+            ),
+            td: ({ children }) => (
+              <td className="px-4 py-3 text-gray-600 dark:text-gray-300 border-t border-gray-200 dark:border-gray-800">
+                {children}
+              </td>
+            ),
           }}
         >
           {content}
