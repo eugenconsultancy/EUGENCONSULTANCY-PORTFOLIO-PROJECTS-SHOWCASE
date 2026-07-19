@@ -22,6 +22,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import Link from "next/link";
+import { useState, useEffect, useCallback } from "react";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 type MonthlyData = {
@@ -45,13 +46,13 @@ type Activity = {
 
 type Props = {
   monthlyComments: MonthlyData[];
-  totalViews: number;
-  totalComments: number;
-  totalReactions: number;
-  topProject: { title: string; slug: string; views: number } | null;
-  topProjectsByViews: { title: string; slug: string; views: number }[];
-  reactionDistribution: ReactionDist[];
-  recentActivity: Activity[];
+  totalViews?: number;
+  totalComments?: number;
+  totalReactions?: number;
+  topProject?: { title: string; slug: string; views: number } | null;
+  topProjectsByViews?: { title: string; slug: string; views: number }[];
+  reactionDistribution?: ReactionDist[];
+  recentActivity?: Activity[];
 };
 
 // ── Sub‑components ───────────────────────────────────────────────────────────
@@ -122,9 +123,18 @@ export function AdminCharts({
   reactionDistribution,
   recentActivity,
 }: Props) {
+  const showFullDashboard =
+    totalViews !== undefined &&
+    totalComments !== undefined &&
+    totalReactions !== undefined &&
+    topProjectsByViews &&
+    reactionDistribution &&
+    recentActivity;
+
+  const totalCommentsFallback = totalComments ?? monthlyComments.reduce((sum, m) => sum + m.count, 0);
   const avgComments =
     monthlyComments.length > 0
-      ? Math.round(totalComments / monthlyComments.length)
+      ? Math.round(totalCommentsFallback / monthlyComments.length)
       : 0;
   const peakComment =
     monthlyComments.length > 0
@@ -136,134 +146,126 @@ export function AdminCharts({
 
   return (
     <div className="space-y-6">
-      {/* KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard
-          icon={Eye}
-          label="Total Views"
-          value={totalViews.toLocaleString()}
-        />
-        <KpiCard
-          icon={MessageSquare}
-          label="Total Comments"
-          value={totalComments}
-        />
-        <KpiCard
-          icon={ThumbsUp}
-          label="Total Reactions"
-          value={totalReactions.toLocaleString()}
-        />
-        <KpiCard
-          icon={Star}
-          label="Top Project"
-          value={topProject ? `${topProject.title} (${topProject.views} views)` : "—"}
-          change={topProject ? "View" : undefined}
-          changeType="up"
-        />
-      </div>
+      {showFullDashboard && (
+        <>
+          {/* KPI Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <KpiCard icon={Eye} label="Total Views" value={totalViews!.toLocaleString()} />
+            <KpiCard icon={MessageSquare} label="Total Comments" value={totalComments!} />
+            <KpiCard icon={ThumbsUp} label="Total Reactions" value={totalReactions!.toLocaleString()} />
+            <KpiCard
+              icon={Star}
+              label="Top Project"
+              value={topProject ? `${topProject.title} (${topProject.views} views)` : "—"}
+              change={topProject ? "View" : undefined}
+              changeType="up"
+            />
+          </div>
 
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Projects by Views */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl p-6"
-        >
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
-            <Eye className="w-5 h-5 text-blue-500" />
-            Most Viewed Projects
-          </h3>
-          {topProjectsByViews.length === 0 ? (
-            <p className="text-sm text-gray-500">No data yet.</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart
-                data={topProjectsByViews.slice(0, 6)}
-                margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
-              >
-                <defs>
-                  <linearGradient id={barGradientId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6366f1" />
-                    <stop offset="100%" stopColor="#3b82f6" />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                <XAxis
-                  dataKey="title"
-                  stroke="#9ca3af"
-                  fontSize={11}
-                  tickLine={false}
-                  angle={-20}
-                  textAnchor="end"
-                  height={60}
-                />
-                <YAxis allowDecimals={false} stroke="#9ca3af" fontSize={12} tickLine={false} />
-                <Tooltip />
-                <Bar dataKey="views" radius={[6, 6, 0, 0]} fill={`url(#${barGradientId})`} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </motion.div>
-
-        {/* Reaction Distribution */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl p-6"
-        >
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
-            <ThumbsUp className="w-5 h-5 text-blue-500" />
-            Reaction Breakdown
-          </h3>
-          {reactionDistribution.length === 0 ? (
-            <p className="text-sm text-gray-500">No reactions yet.</p>
-          ) : (
-            <div className="flex items-center gap-4">
-              <ResponsiveContainer width="60%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={reactionDistribution}
-                    dataKey="count"
-                    nameKey="type"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    innerRadius={50}
-                    paddingAngle={3}
+          {/* Charts Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Top Projects by Views */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl p-6"
+            >
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+                <Eye className="w-5 h-5 text-blue-500" />
+                Most Viewed Projects
+              </h3>
+              {topProjectsByViews!.length === 0 ? (
+                <p className="text-sm text-gray-500">No data yet.</p>
+              ) : (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart
+                    data={topProjectsByViews!.slice(0, 6)}
+                    margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
                   >
-                    {reactionDistribution.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={reactionColors[index % reactionColors.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="space-y-2 text-sm">
-                {reactionDistribution.map((item, idx) => (
-                  <div key={item.type} className="flex items-center gap-2">
-                    <span
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: reactionColors[idx % reactionColors.length] }}
+                    <defs>
+                      <linearGradient id={barGradientId} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#6366f1" />
+                        <stop offset="100%" stopColor="#3b82f6" />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                    <XAxis
+                      dataKey="title"
+                      stroke="#9ca3af"
+                      fontSize={11}
+                      tickLine={false}
+                      angle={-20}
+                      textAnchor="end"
+                      height={60}
                     />
-                    <span className="text-gray-600 dark:text-gray-300 capitalize">{item.type}</span>
-                    <span className="ml-auto font-semibold text-gray-900 dark:text-white">
-                      {item.count}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </motion.div>
-      </div>
+                    <YAxis allowDecimals={false} stroke="#9ca3af" fontSize={12} tickLine={false} />
+                    <Tooltip />
+                    <Bar dataKey="views" radius={[6, 6, 0, 0]} fill={`url(#${barGradientId})`} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </motion.div>
 
-      {/* Comment Activity */}
+            {/* Reaction Distribution */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl p-6"
+            >
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+                <ThumbsUp className="w-5 h-5 text-blue-500" />
+                Reaction Breakdown
+              </h3>
+              {reactionDistribution!.length === 0 ? (
+                <p className="text-sm text-gray-500">No reactions yet.</p>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <ResponsiveContainer width="60%" height={200}>
+                    <PieChart>
+                      <Pie
+                        data={reactionDistribution}
+                        dataKey="count"
+                        nameKey="type"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        innerRadius={50}
+                        paddingAngle={3}
+                      >
+                        {reactionDistribution!.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={reactionColors[index % reactionColors.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="space-y-2 text-sm">
+                    {reactionDistribution!.map((item, idx) => (
+                      <div key={item.type} className="flex items-center gap-2">
+                        <span
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: reactionColors[idx % reactionColors.length] }}
+                        />
+                        <span className="text-gray-600 dark:text-gray-300 capitalize">{item.type}</span>
+                        <span className="ml-auto font-semibold text-gray-900 dark:text-white">
+                          {item.count}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </>
+      )}
+
+      {/* Comment Activity (always shown) */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -277,7 +279,7 @@ export function AdminCharts({
         <div className="grid grid-cols-3 gap-4 mb-4">
           <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-3 text-center">
             <p className="text-xs text-gray-500">Total</p>
-            <p className="text-xl font-bold text-gray-900 dark:text-white">{totalComments}</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">{totalCommentsFallback}</p>
           </div>
           <div className="rounded-xl bg-gray-50 dark:bg-gray-800 p-3 text-center">
             <p className="text-xs text-gray-500">Avg / month</p>
@@ -314,55 +316,56 @@ export function AdminCharts({
         )}
       </motion.div>
 
-      {/* Recent Activity Feed */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25 }}
-        className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl p-6"
-      >
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
-          <Zap className="w-5 h-5 text-amber-500" />
-          Recent Activity
-        </h3>
-        {recentActivity.length === 0 ? (
-          <p className="text-sm text-gray-500">No recent activity.</p>
-        ) : (
-          <div className="space-y-3">
-            {recentActivity.slice(0, 8).map((act) => (
-              <div key={act.id} className="flex items-start gap-3 text-sm">
-                <span
-                  className={`mt-0.5 w-2 h-2 rounded-full ${act.type === "comment"
-                      ? "bg-blue-500"
-                      : act.type === "reaction"
-                        ? "bg-amber-500"
-                        : "bg-emerald-500"
-                    }`}
-                />
-                <div className="flex-1 min-w-0">
-                  <span className="text-gray-600 dark:text-gray-300">
-                    {act.type === "comment"
-                      ? "New comment on"
-                      : act.type === "reaction"
-                        ? "Reaction on"
-                        : "View on"}{" "}
-                    <Link
-                      href={`/projects/${act.projectSlug}`}
-                      className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                    >
-                      {act.projectTitle}
-                    </Link>
+      {showFullDashboard && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl p-6"
+        >
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+            <Zap className="w-5 h-5 text-amber-500" />
+            Recent Activity
+          </h3>
+          {recentActivity!.length === 0 ? (
+            <p className="text-sm text-gray-500">No recent activity.</p>
+          ) : (
+            <div className="space-y-3">
+              {recentActivity!.slice(0, 8).map((act) => (
+                <div key={act.id} className="flex items-start gap-3 text-sm">
+                  <span
+                    className={`mt-0.5 w-2 h-2 rounded-full ${act.type === "comment"
+                        ? "bg-blue-500"
+                        : act.type === "reaction"
+                          ? "bg-amber-500"
+                          : "bg-emerald-500"
+                      }`}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-gray-600 dark:text-gray-300">
+                      {act.type === "comment"
+                        ? "New comment on"
+                        : act.type === "reaction"
+                          ? "Reaction on"
+                          : "View on"}{" "}
+                      <Link
+                        href={`/projects/${act.projectSlug}`}
+                        className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      >
+                        {act.projectTitle}
+                      </Link>
+                    </span>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{act.detail}</p>
+                  </div>
+                  <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                    {act.date}
                   </span>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{act.detail}</p>
                 </div>
-                <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
-                  {act.date}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </motion.div>
+              ))}
+            </div>
+          )}
+        </motion.div>
+      )}
     </div>
   );
 }
