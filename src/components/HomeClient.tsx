@@ -96,12 +96,6 @@ const DEPLOYMENT_STEPS = [
   { icon: "📊", name: "Monitoring", detail: "Uptime alerts, error budgets, and Sentry for real-time crash reports." },
 ];
 
-const TECH_ORBIT = [
-  "Next.js", "Django", "PostgreSQL", "Docker",
-  "TypeScript", "Redis", "AWS", "FastAPI",
-  "React Native", "Nginx", "Celery", "Elasticsearch",
-];
-
 const STATS = [
   { end: 48, label: "Projects Delivered", suffix: "+" },
   { end: 25, label: "Technologies Mastered", suffix: "" },
@@ -161,6 +155,33 @@ const ANALYTICS_TOOLS = [
   { icon: "🐍", name: "Python", tags: ["Pandas", "NumPy", "SciPy", "Statsmodels"] },
   { icon: "📈", name: "Visualization", tags: ["Matplotlib", "Plotly", "Power BI", "Excel Dashboards"] },
   { icon: "🤖", name: "Machine Learning", tags: ["scikit-learn", "Classification", "Regression", "Clustering"] },
+];
+
+const ENGAGEMENT_MODELS = [
+  {
+    icon: "🚀",
+    title: "Project-Based",
+    color: "#3B82F6",
+    bg: "rgba(59,130,246,0.08)",
+    border: "rgba(59,130,246,0.25)",
+    items: ["Fixed scope & deliverables", "Milestone-based billing", "Dedicated project manager", "Full handover + docs"],
+  },
+  {
+    icon: "🔄",
+    title: "Retainer",
+    color: "#8B5CF6",
+    bg: "rgba(139,92,246,0.08)",
+    border: "rgba(139,92,246,0.25)",
+    items: ["Monthly hours block", "Priority response SLA", "Ongoing maintenance", "Iterative feature delivery"],
+  },
+  {
+    icon: "🤝",
+    title: "Consulting",
+    color: "#10B981",
+    bg: "rgba(16,185,129,0.08)",
+    border: "rgba(16,185,129,0.25)",
+    items: ["Architecture reviews", "Code audits & tech debt", "Team mentoring", "Strategic roadmapping"],
+  },
 ];
 
 // ─── Utility hooks ────────────────────────────────────────────────────────────
@@ -280,49 +301,149 @@ function StatCounter({ end, label, suffix, trigger }: { end: number; label: stri
   );
 }
 
-// ─── Tech orbit diagram ───────────────────────────────────────────────────────
-function TechOrbit({ items }: { items: string[] }) {
+// ─── Latest Projects — Landscape Slide Carousel ───────────────────────────────
+function LatestProjectsCarousel({ projects }: { projects: ProjectCard[] }) {
+  const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const total = projects.length;
+
+  useEffect(() => {
+    if (paused || total <= 1) return;
+    const id = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % total);
+    }, 4500);
+    return () => clearInterval(id);
+  }, [paused, total]);
+
+  if (total === 0) return null;
+
+  const project = projects[current];
+  const mainImage = project.images.find((img) => img.isMain) ?? project.images[0];
+  const techs = project.techStack.split(",").map((t) => t.trim());
+
   return (
-    <>
-      <div className="hidden md:flex relative items-center justify-center h-96 select-none">
-        <div className="absolute z-10 w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center shadow-2xl shadow-blue-500/30">
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 opacity-50 scale-125 blur-lg" />
-          <span className="relative text-white text-xs font-black text-center leading-tight">EUGEN<br />STACK</span>
-        </div>
-        {[
-          { r: 105, slice: items.slice(0, 4) },
-          { r: 165, slice: items.slice(4, 9) },
-          { r: 215, slice: items.slice(9) },
-        ].map((ring, ri) => (
-          <div key={ri} className="absolute rounded-full border border-dashed border-gray-200 dark:border-gray-700" style={{ width: ring.r * 2, height: ring.r * 2 }}>
-            {ring.slice.map((tech, ti) => {
-              const angle = (360 / ring.slice.length) * ti;
-              const rad = (angle * Math.PI) / 180;
-              const x = ring.r * Math.cos(rad - Math.PI / 2);
-              const y = ring.r * Math.sin(rad - Math.PI / 2);
-              return (
-                <div key={tech} className="absolute" style={{ left: "50%", top: "50%", transform: `translate(calc(${x}px - 50%), calc(${y}px - 50%))` }}>
-                  <div className="px-3 py-1.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 shadow-md hover:border-blue-400 hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap">
-                    {tech}
-                  </div>
-                </div>
-              );
-            })}
+    <section className="py-20 bg-white dark:bg-gray-950">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8">
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <SectionLabel>Latest Work</SectionLabel>
+            <SectionHeading sub="Our most recently published case studies — click to explore the full story.">
+              Latest Case Studies
+            </SectionHeading>
           </div>
-        ))}
+          <Link href="/projects" className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline underline-offset-2 whitespace-nowrap mb-10">
+            View all →
+          </Link>
+        </div>
+
+        <div
+          className="relative rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-2xl bg-white dark:bg-gray-900"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          style={{ minHeight: 420 }}
+        >
+          {/* Slide transition wrapper */}
+          <div key={project.id} style={{ animation: "fadeUp 0.45s ease both" }} className="flex flex-col md:flex-row h-full">
+            {/* Image — landscape left pane */}
+            <Link
+              href={`/projects/${project.slug}`}
+              className="group relative md:w-[55%] flex-shrink-0 bg-gray-100 dark:bg-gray-800 overflow-hidden"
+              style={{ minHeight: 300 }}
+            >
+              {mainImage ? (
+                <Image
+                  src={mainImage.filename}
+                  alt={mainImage.alt ?? project.title}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  priority
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-violet-100 dark:from-gray-800 dark:to-gray-700">
+                  <span className="text-6xl opacity-20">📦</span>
+                </div>
+              )}
+              {/* Overlay on hover */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-8">
+                <span className="text-white text-sm font-semibold px-5 py-2.5 rounded-full border border-white/40 backdrop-blur-sm">
+                  View Full Case Study →
+                </span>
+              </div>
+              {/* Slide number badge */}
+              <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/40 backdrop-blur-sm text-white text-xs font-bold">
+                {current + 1} / {total}
+              </div>
+            </Link>
+
+            {/* Content — right pane */}
+            <div className="flex flex-col justify-between p-8 md:p-10 flex-1">
+              <div>
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {techs.slice(0, 4).map((t) => (
+                    <span key={t} className="px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-semibold">
+                      {t}
+                    </span>
+                  ))}
+                  {techs.length > 4 && (
+                    <span className="px-2.5 py-1 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg text-xs font-semibold">
+                      +{techs.length - 4} more
+                    </span>
+                  )}
+                </div>
+                <Link href={`/projects/${project.slug}`} className="group">
+                  <h3 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight mb-4">
+                    {project.title}
+                  </h3>
+                </Link>
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm md:text-base line-clamp-4">
+                  {project.summary}
+                </p>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-5 mt-6 pt-5 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-400 dark:text-gray-500 mb-6">
+                  <span>👁 {project.viewCount.toLocaleString()} views</span>
+                  <span>⏱ {project.readingTime} min read</span>
+                </div>
+
+                {/* Dot navigation */}
+                {total > 1 && (
+                  <div className="flex items-center gap-2">
+                    {projects.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { setCurrent(i); setPaused(true); }}
+                        aria-label={`Go to slide ${i + 1}`}
+                        className={`rounded-full transition-all duration-300 ${i === current
+                            ? "w-6 h-2 bg-blue-600"
+                            : "w-2 h-2 bg-gray-300 dark:bg-gray-600 hover:bg-blue-400"
+                          }`}
+                      />
+                    ))}
+                    <button
+                      onClick={() => setCurrent((prev) => (prev - 1 + total) % total)}
+                      className="ml-3 w-8 h-8 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-all text-sm"
+                    >
+                      ←
+                    </button>
+                    <button
+                      onClick={() => setCurrent((prev) => (prev + 1) % total)}
+                      className="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-all text-sm"
+                    >
+                      →
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="flex md:hidden flex-wrap justify-center gap-2 mt-4">
-        {items.map((tech) => (
-          <span key={tech} className="px-3 py-1.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm">
-            {tech}
-          </span>
-        ))}
-      </div>
-    </>
+    </section>
   );
 }
 
-// ─── Project carousel ─────────────────────────────────────────────────────────
+// ─── Project carousel (archive / featured) ─────────────────────────────────────
 function ProjectCarousel({ projects }: { projects: ProjectCard[] }) {
   const [paused, setPaused] = useState(false);
   const [offset, setOffset] = useState(0);
@@ -389,6 +510,131 @@ function ProjectCarousel({ projects }: { projects: ProjectCard[] }) {
   );
 }
 
+// ─── Certifications — horizontal slide carousel ───────────────────────────────
+function CertificationsSection({ certifications }: { certifications: Certification[] }) {
+  const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const total = certifications?.length ?? 0;
+
+  useEffect(() => {
+    if (paused || total <= 1) return;
+    const id = setInterval(() => setCurrent((prev) => (prev + 1) % total), 4000);
+    return () => clearInterval(id);
+  }, [paused, total]);
+
+  if (!certifications || total === 0) {
+    return (
+      <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 text-center">
+          <SectionLabel>Credentials</SectionLabel>
+          <SectionHeading sub="Verified professional certifications will appear here once added.">
+            Certifications
+          </SectionHeading>
+          <p className="text-gray-500 dark:text-gray-400">No certifications yet. Add them via the admin panel.</p>
+        </div>
+      </section>
+    );
+  }
+
+  const cert = certifications[current];
+  const accent = "#3B82F6";
+
+  return (
+    <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8">
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <SectionLabel>Credentials</SectionLabel>
+            <SectionHeading sub="Verified professional certifications from globally recognised institutions.">
+              Certifications
+            </SectionHeading>
+          </div>
+        </div>
+
+        <div
+          className="relative rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-xl bg-white dark:bg-gray-900"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          style={{ minHeight: 260 }}
+        >
+          {/* Top accent bar */}
+          <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-3xl bg-gradient-to-r from-blue-600 via-violet-500 to-cyan-400" />
+
+          <div key={cert.id} style={{ animation: "fadeUp 0.4s ease both" }} className="flex flex-col md:flex-row gap-0 h-full">
+            {/* Left panel — icon + badge number */}
+            <div className="flex flex-col items-center justify-center md:w-48 bg-gradient-to-br from-blue-50 to-violet-50 dark:from-blue-950/30 dark:to-violet-950/20 p-8 border-b md:border-b-0 md:border-r border-gray-100 dark:border-gray-800 flex-shrink-0">
+              <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-lg mb-3"
+                style={{ background: `linear-gradient(135deg, ${accent}33, ${accent}18)`, border: `1px solid ${accent}40` }}
+              >
+                🏆
+              </div>
+              <span className="text-xs text-gray-400 dark:text-gray-500 font-bold tabular-nums">
+                {current + 1} / {total}
+              </span>
+            </div>
+
+            {/* Right panel — cert details */}
+            <div className="flex flex-col justify-between p-8 md:p-10 flex-1">
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold mb-4 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-300 dark:border-green-800">
+                  ✓ Verified
+                </span>
+                <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white leading-snug mb-2">
+                  {cert.name}
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">{cert.issuer}</p>
+                {cert.year && (
+                  <p className="text-xs text-gray-400 dark:text-gray-500">{cert.year}</p>
+                )}
+                {cert.url && (
+                  <a
+                    href={cert.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 mt-4 text-sm text-blue-600 dark:text-blue-400 font-semibold hover:underline underline-offset-2"
+                  >
+                    Verify credential →
+                  </a>
+                )}
+              </div>
+
+              {/* Navigation */}
+              {total > 1 && (
+                <div className="flex items-center gap-2 mt-6 pt-5 border-t border-gray-100 dark:border-gray-800">
+                  {certifications.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setCurrent(i); setPaused(true); }}
+                      aria-label={`Go to certification ${i + 1}`}
+                      className={`rounded-full transition-all duration-300 ${i === current
+                          ? "w-6 h-2 bg-blue-600"
+                          : "w-2 h-2 bg-gray-300 dark:bg-gray-600 hover:bg-blue-400"
+                        }`}
+                    />
+                  ))}
+                  <button
+                    onClick={() => setCurrent((prev) => (prev - 1 + total) % total)}
+                    className="ml-3 w-8 h-8 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-all text-sm"
+                  >
+                    ←
+                  </button>
+                  <button
+                    onClick={() => setCurrent((prev) => (prev + 1) % total)}
+                    className="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-all text-sm"
+                  >
+                    →
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ─── Deployment journey ───────────────────────────────────────────────────────
 function DeploymentJourney() {
   const [active, setActive] = useState<number | null>(null);
@@ -399,11 +645,10 @@ function DeploymentJourney() {
           <React.Fragment key={step.name}>
             <button
               onClick={() => setActive(active === i ? null : i)}
-              className={`group flex flex-col items-center text-center p-4 rounded-2xl transition-all duration-200 min-w-[100px] ${
-                active === i
+              className={`group flex flex-col items-center text-center p-4 rounded-2xl transition-all duration-200 min-w-[100px] ${active === i
                   ? "bg-gradient-to-br from-blue-600 to-violet-600 text-white shadow-xl shadow-blue-500/30 scale-105"
                   : "bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:border-blue-300 hover:shadow-lg dark:hover:border-blue-700"
-              }`}
+                }`}
             >
               <span className="text-2xl mb-1.5">{step.icon}</span>
               <span className="text-xs font-bold leading-tight">{step.name}</span>
@@ -493,7 +738,7 @@ function SeoAnalyticsSection() {
                 </div>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
-                Improve search visibility, website performance, and organic traffic using modern SEO best practices, technical audits, structured data, and search engine optimization strategies aligned with Google's latest guidelines.
+                Improve search visibility, website performance, and organic traffic using modern SEO best practices, technical audits, structured data, and search engine optimization strategies aligned with Google&apos;s latest guidelines.
               </p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                 {SEO_CAPABILITIES.map((cap) => <CapChip key={cap}>{cap}</CapChip>)}
@@ -525,22 +770,19 @@ function SeoAnalyticsSection() {
             </div>
 
             <div
-              className="rounded-2xl p-5"
-              style={{
-                background: "rgba(15,23,42,0.04)",
-                border: "1px solid rgba(99,102,241,0.12)",
-              }}
+              className="rounded-2xl p-5 bg-gray-50 dark:bg-gray-900"
+              style={{ border: "1px solid rgba(99,102,241,0.15)" }}
             >
-              <p className="text-xs font-black tracking-[0.15em] uppercase text-gray-400 dark:text-gray-500 mb-3">Trusted SEO Platforms</p>
+              <p className="text-xs font-black tracking-[0.15em] uppercase text-gray-500 dark:text-gray-400 mb-3">Trusted SEO Platforms</p>
               <div className="flex flex-wrap gap-2">
                 {SEO_PLATFORMS.map((p) => (
                   <span
                     key={p}
                     className="px-2.5 py-1 rounded-lg text-xs font-semibold"
                     style={{
-                      background: "rgba(245,158,11,0.1)",
-                      border: "1px solid rgba(245,158,11,0.2)",
-                      color: "#D97706",
+                      background: "rgba(245,158,11,0.12)",
+                      border: "1px solid rgba(245,158,11,0.25)",
+                      color: "#B45309",
                     }}
                   >
                     {p}
@@ -550,17 +792,12 @@ function SeoAnalyticsSection() {
             </div>
           </div>
 
+          {/* ── Data Analytics column ── */}
           <div className="space-y-5">
-            <div
-              className="rounded-2xl p-6"
-              style={{
-                background: "linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(6,182,212,0.05) 100%)",
-                border: "1px solid rgba(16,185,129,0.2)",
-              }}
-            >
+            <div className="rounded-2xl p-6 bg-white dark:bg-gray-900" style={{ border: "1px solid rgba(16,185,129,0.25)" }}>
               <div className="flex items-center gap-3 mb-3">
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 shadow-md"
                   style={{ background: "linear-gradient(135deg, #10B981, #06B6D4)", boxShadow: "0 4px 12px rgba(16,185,129,0.3)" }}
                 >
                   📊
@@ -570,30 +807,26 @@ function SeoAnalyticsSection() {
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">SPSS · Python · Machine Learning · Visualization</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-5">
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-5">
                 Analyze research data using modern statistical techniques to support evidence-based decision making for academic projects, business intelligence, and market studies.
               </p>
 
+              {/* Analytics tool cards — fixed contrast */}
               <div className="grid grid-cols-2 gap-3">
                 {ANALYTICS_TOOLS.map((tool) => (
                   <div
                     key={tool.name}
-                    className="rounded-xl p-3.5"
-                    style={{
-                      background: "rgba(255,255,255,0.5)",
-                      border: "1px solid rgba(16,185,129,0.15)",
-                    }}
+                    className="rounded-xl p-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                   >
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-lg">{tool.icon}</span>
-                      <span className="font-black text-gray-900 dark:text-gray-100 text-sm">{tool.name}</span>
+                      <span className="font-black text-gray-900 dark:text-white text-sm">{tool.name}</span>
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {tool.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="px-1.5 py-0.5 rounded text-xs font-medium"
-                          style={{ background: "rgba(16,185,129,0.1)", color: "#059669" }}
+                          className="px-1.5 py-0.5 rounded text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300"
                         >
                           {tag}
                         </span>
@@ -603,78 +836,67 @@ function SeoAnalyticsSection() {
                 ))}
               </div>
 
-              <div className="mt-4 pt-4 border-t border-emerald-100 dark:border-emerald-900/30">
-                <p className="text-xs font-black tracking-[0.12em] uppercase text-gray-400 dark:text-gray-500 mb-3">Research Methods</p>
+              <div className="mt-5 pt-5 border-t border-gray-100 dark:border-gray-800">
+                <p className="text-xs font-black tracking-[0.12em] uppercase text-gray-500 dark:text-gray-400 mb-3">Research Methods</p>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                   {DATA_CAPABILITIES.map((cap) => <CapChip key={cap}>{cap}</CapChip>)}
                 </div>
               </div>
             </div>
 
+            {/* Workflow strips */}
             <div
-              className="rounded-2xl p-5"
-              style={{
-                background: "rgba(15,23,42,0.04)",
-                border: "1px solid rgba(99,102,241,0.12)",
-              }}
+              className="rounded-2xl p-5 bg-gray-50 dark:bg-gray-900"
+              style={{ border: "1px solid rgba(99,102,241,0.15)" }}
             >
-              <p className="text-xs font-black tracking-[0.15em] uppercase text-gray-400 dark:text-gray-500 mb-4">Research Workflow</p>
+              <p className="text-xs font-black tracking-[0.15em] uppercase text-gray-500 dark:text-gray-400 mb-4">Research Workflow</p>
               <div className="flex flex-wrap items-center gap-2">
                 {["Research Data", "Cleaning", "Exploration", "Statistical Analysis", "Visualization", "Interpretation", "Professional Report"].map((step, i, arr) => (
                   <React.Fragment key={step}>
                     <span
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold"
+                      className="px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-800 dark:text-emerald-200"
                       style={{
-                        background: `rgba(16,185,129,${0.07 + i * 0.025})`,
-                        border: "1px solid rgba(16,185,129,0.2)",
-                        color: "#059669",
+                        background: `rgba(16,185,129,${0.1 + i * 0.02})`,
+                        border: "1px solid rgba(16,185,129,0.25)",
                       }}
                     >
                       {step}
                     </span>
-                    {i < arr.length - 1 && <span className="text-gray-300 dark:text-gray-700 font-bold text-xs">→</span>}
+                    {i < arr.length - 1 && <span className="text-gray-400 dark:text-gray-600 font-bold text-xs">→</span>}
                   </React.Fragment>
                 ))}
               </div>
 
-              <p className="text-xs font-black tracking-[0.15em] uppercase text-gray-400 dark:text-gray-500 mb-4 mt-5">SEO Audit Workflow</p>
+              <p className="text-xs font-black tracking-[0.15em] uppercase text-gray-500 dark:text-gray-400 mb-4 mt-5">SEO Audit Workflow</p>
               <div className="flex flex-wrap items-center gap-2">
                 {["Website Audit", "Technical Analysis", "Keyword Research", "On-page Optimization", "Search Console", "Performance", "Monitoring"].map((step, i, arr) => (
                   <React.Fragment key={step}>
                     <span
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold"
+                      className="px-3 py-1.5 rounded-xl text-xs font-bold text-amber-800 dark:text-amber-200"
                       style={{
-                        background: `rgba(245,158,11,${0.07 + i * 0.025})`,
-                        border: "1px solid rgba(245,158,11,0.2)",
-                        color: "#D97706",
+                        background: `rgba(245,158,11,${0.1 + i * 0.02})`,
+                        border: "1px solid rgba(245,158,11,0.25)",
                       }}
                     >
                       {step}
                     </span>
-                    {i < arr.length - 1 && <span className="text-gray-300 dark:text-gray-700 font-bold text-xs">→</span>}
+                    {i < arr.length - 1 && <span className="text-gray-400 dark:text-gray-600 font-bold text-xs">→</span>}
                   </React.Fragment>
                 ))}
               </div>
             </div>
 
             <div
-              className="rounded-2xl p-5"
-              style={{
-                background: "rgba(15,23,42,0.04)",
-                border: "1px solid rgba(99,102,241,0.12)",
-              }}
+              className="rounded-2xl p-5 bg-gray-50 dark:bg-gray-900"
+              style={{ border: "1px solid rgba(99,102,241,0.15)" }}
             >
-              <p className="text-xs font-black tracking-[0.15em] uppercase text-gray-400 dark:text-gray-500 mb-3">Research Toolkit</p>
+              <p className="text-xs font-black tracking-[0.15em] uppercase text-gray-500 dark:text-gray-400 mb-3">Research Toolkit</p>
               <div className="flex flex-wrap gap-2">
                 {DATA_TOOLS.map((t) => (
                   <span
                     key={t}
-                    className="px-2.5 py-1 rounded-lg text-xs font-semibold"
-                    style={{
-                      background: "rgba(16,185,129,0.1)",
-                      border: "1px solid rgba(16,185,129,0.2)",
-                      color: "#059669",
-                    }}
+                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300"
+                    style={{ border: "1px solid rgba(16,185,129,0.25)" }}
                   >
                     {t}
                   </span>
@@ -688,7 +910,7 @@ function SeoAnalyticsSection() {
   );
 }
 
-// ─── Process steps ────────────────────────────────────────────────────────────
+// ─── Process section ──────────────────────────────────────────────────────────
 function ProcessSection() {
   return (
     <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
@@ -733,78 +955,86 @@ function ProcessSection() {
   );
 }
 
-// ─── Certifications section ─── now fully driven by DB data
-function CertificationsSection({ certifications }: { certifications: Certification[] }) {
-  if (!certifications || certifications.length === 0) {
-    return (
-      <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 text-center">
-          <SectionLabel>Credentials</SectionLabel>
-          <SectionHeading sub="Verified professional certifications will appear here once added.">
-            Certifications
-          </SectionHeading>
-          <p className="text-gray-500 dark:text-gray-400">No certifications yet. Add them via the admin panel.</p>
-        </div>
-      </section>
-    );
-  }
-
+// ─── Availability section — redesigned ───────────────────────────────────────
+function AvailabilitySection({ availability }: { availability: string }) {
   return (
-    <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
+    <section className="py-20 bg-white dark:bg-gray-950">
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
-        <SectionLabel>Credentials</SectionLabel>
-        <SectionHeading sub="Verified professional certifications from globally recognised institutions.">
-          Certifications
+        <SectionLabel>Engagement model</SectionLabel>
+        <SectionHeading sub="Choose the working arrangement that fits your team and timeline.">
+          Availability &amp; Engagement
         </SectionHeading>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {certifications.map((cert) => {
-            // Pick an icon based on title or a default
-            const icon = "🏆";
-            const accent = "#3B82F6"; // you can randomise if needed
-            return (
+
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-8 items-start">
+          {/* Left — engagement model cards */}
+          <div className="space-y-4">
+            {ENGAGEMENT_MODELS.map((model) => (
               <div
-                key={cert.id}
-                className="group relative rounded-2xl p-6 flex flex-col gap-4 hover:-translate-y-1 hover:shadow-xl transition-all duration-200 overflow-hidden"
-                style={{
-                  background: `linear-gradient(135deg, ${accent}0d 0%, rgba(15,23,42,0.02) 100%)`,
-                  border: `1px solid ${accent}30`,
-                }}
+                key={model.title}
+                className="rounded-2xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                style={{ background: model.bg, border: `1px solid ${model.border}` }}
               >
-                <div
-                  className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl"
-                  style={{ background: `linear-gradient(90deg, ${accent}, ${accent}44)` }}
-                />
-                <div className="flex items-start gap-4">
+                <div className="flex items-center gap-3 mb-3">
                   <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0 shadow-md"
-                    style={{
-                      background: `linear-gradient(135deg, ${accent}33, ${accent}18)`,
-                      border: `1px solid ${accent}40`,
-                    }}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center text-base shadow-sm"
+                    style={{ background: model.color, boxShadow: `0 4px 12px ${model.color}44` }}
                   >
-                    {icon}
+                    {model.icon}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold mb-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-300 dark:border-green-800">
-                      Verified
-                    </span>
-                    <h3 className="font-black text-gray-900 dark:text-white text-sm leading-snug">{cert.name}</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">{cert.issuer}</p>
-                    {cert.url && (
-                      <a
-                        href={cert.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block mt-2 text-xs text-blue-600 hover:underline font-semibold"
-                      >
-                        Verify →
-                      </a>
-                    )}
-                  </div>
+                  <h3 className="font-black text-gray-900 dark:text-white text-sm">{model.title}</h3>
                 </div>
+                <ul className="space-y-1.5">
+                  {model.items.map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300 font-medium">
+                      <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: model.color }} />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            );
-          })}
+            ))}
+          </div>
+
+          {/* Right — current availability status + note */}
+          <div className="rounded-2xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/50 dark:bg-blue-950/20 p-8 flex flex-col gap-6 h-full">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 mt-1">
+                <span className="flex h-4 w-4">
+                  <span className="animate-ping absolute inline-flex h-4 w-4 rounded-full bg-green-400 opacity-50" />
+                  <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500" />
+                </span>
+              </div>
+              <div>
+                <p className="text-xs font-black tracking-[0.15em] uppercase text-green-600 dark:text-green-400 mb-1">
+                  Currently Available
+                </p>
+                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed text-sm">
+                  {availability}
+                </p>
+              </div>
+            </div>
+
+            <div className="border-t border-blue-100 dark:border-blue-900/40 pt-6 grid grid-cols-2 gap-4">
+              {[
+                { label: "Response time", value: "< 24 hours" },
+                { label: "Time zone", value: "UTC +3 (EAT)" },
+                { label: "Meeting format", value: "Video / Async" },
+                { label: "Start date", value: "Immediate" },
+              ].map(({ label, value }) => (
+                <div key={label}>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mb-0.5">{label}</p>
+                  <p className="text-sm font-black text-gray-900 dark:text-white">{value}</p>
+                </div>
+              ))}
+            </div>
+
+            <Link
+              href="/contact"
+              className="self-start inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white text-sm font-bold transition-all shadow-lg shadow-blue-500/20 hover:-translate-y-0.5"
+            >
+              Book a Consultation →
+            </Link>
+          </div>
         </div>
       </div>
     </section>
@@ -866,7 +1096,7 @@ export function HomeClient({
 
       <main className="overflow-x-hidden">
 
-        {/* HERO */}
+        {/* ── HERO ── */}
         <section className="relative min-h-screen flex items-center overflow-hidden bg-white dark:bg-gray-950">
           <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
             <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-blue-400/15 dark:bg-blue-600/10 blur-[120px]" style={{ animation: "aurora1 14s ease-in-out infinite" }} />
@@ -961,7 +1191,7 @@ export function HomeClient({
           </div>
         </section>
 
-        {/* STATISTICS STRIP */}
+        {/* ── STATISTICS STRIP ── */}
         <section className="border-y border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/50">
           <div className="max-w-5xl mx-auto px-6">
             <div ref={statsSection.ref} className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100 dark:divide-gray-800">
@@ -972,12 +1202,12 @@ export function HomeClient({
           </div>
         </section>
 
-        {/* LATEST PROJECTS */}
+        {/* ── LATEST CASE STUDIES — landscape slide carousel ── */}
         {latestProjects.length > 0 && (
-          <LatestProjectsGrid projects={latestProjects} />
+          <LatestProjectsCarousel projects={latestProjects} />
         )}
 
-        {/* PROFESSIONAL IDENTITY */}
+        {/* ── PROFESSIONAL IDENTITY ── */}
         <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
           <div className="max-w-7xl mx-auto px-6 sm:px-8">
             <SectionLabel>Who we are</SectionLabel>
@@ -1020,7 +1250,7 @@ export function HomeClient({
           </div>
         </section>
 
-        {/* FEATURED SERVICES */}
+        {/* ── FEATURED SERVICES ── */}
         <section className="py-20 bg-white dark:bg-gray-950">
           <div className="max-w-7xl mx-auto px-6 sm:px-8">
             <SectionLabel>What we offer</SectionLabel>
@@ -1029,7 +1259,7 @@ export function HomeClient({
             </SectionHeading>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {SERVICES.map((svc) => (
-                <div key={svc.title} className={`group relative rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-7 overflow-hidden hover:-translate-y-2 hover:shadow-2xl transition-all duration-200`}>
+                <div key={svc.title} className="group relative rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-7 overflow-hidden hover:-translate-y-2 hover:shadow-2xl transition-all duration-200">
                   <div className={`absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl bg-gradient-to-r ${svc.gradient}`} />
                   <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${svc.gradient} flex items-center justify-center text-2xl mb-5 shadow-lg transition-transform duration-200 group-hover:scale-110`}>
                     {svc.icon}
@@ -1045,13 +1275,13 @@ export function HomeClient({
           </div>
         </section>
 
-        {/* SEO & DATA ANALYTICS */}
+        {/* ── SEO & DATA ANALYTICS ── */}
         <SeoAnalyticsSection />
 
-        {/* HOW WE BUILD SOFTWARE */}
+        {/* ── HOW WE BUILD SOFTWARE ── */}
         <ProcessSection />
 
-        {/* FROM CODE TO CLOUD */}
+        {/* ── FROM CODE TO CLOUD ── */}
         <section className="py-20 bg-white dark:bg-gray-950">
           <div className="max-w-7xl mx-auto px-6 sm:px-8">
             <SectionLabel>How we ship</SectionLabel>
@@ -1062,20 +1292,9 @@ export function HomeClient({
           </div>
         </section>
 
-        {/* TECHNOLOGY ECOSYSTEM */}
-        <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
-          <div className="max-w-4xl mx-auto px-6 sm:px-8 text-center">
-            <SectionLabel>Our stack</SectionLabel>
-            <SectionHeading sub="Battle-tested technologies, carefully chosen for each project." center>
-              Technology Ecosystem
-            </SectionHeading>
-            <TechOrbit items={TECH_ORBIT} />
-          </div>
-        </section>
-
-        {/* PROJECT ARCHIVE */}
+        {/* ── PROJECT ARCHIVE (auto-scroll carousel) ── */}
         {featuredProjects.length > 0 && (
-          <section className="py-20 bg-white dark:bg-gray-950">
+          <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
             <div className="max-w-7xl mx-auto px-6 sm:px-8 mb-10">
               <div className="flex items-end justify-between">
                 <div>
@@ -1093,8 +1312,8 @@ export function HomeClient({
           </section>
         )}
 
-        {/* WHY CHOOSE US */}
-        <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
+        {/* ── WHY CHOOSE US ── */}
+        <section className="py-20 bg-white dark:bg-gray-950">
           <div className="max-w-7xl mx-auto px-6 sm:px-8">
             <SectionLabel>Our edge</SectionLabel>
             <SectionHeading sub="What makes working with us different from any other engineering team.">
@@ -1116,26 +1335,15 @@ export function HomeClient({
           </div>
         </section>
 
-        {/* CERTIFICATIONS */}
+        {/* ── CERTIFICATIONS — slide viewer ── */}
         <CertificationsSection certifications={certifications} />
 
-        {/* AVAILABILITY */}
+        {/* ── AVAILABILITY & ENGAGEMENT MODEL ── */}
         {profile.availability && (
-          <section className="py-16 bg-white dark:bg-gray-950">
-            <div className="max-w-3xl mx-auto px-6 sm:px-8">
-              <SectionLabel>Engagement model</SectionLabel>
-              <SectionHeading sub="How and when we can work together.">Availability</SectionHeading>
-              <div className="rounded-2xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/50 dark:bg-blue-950/20 p-8">
-                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{profile.availability}</p>
-                <Link href="/contact" className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white text-sm font-bold transition-all shadow-lg shadow-blue-500/20">
-                  Get in touch →
-                </Link>
-              </div>
-            </div>
-          </section>
+          <AvailabilitySection availability={profile.availability} />
         )}
 
-        {/* FINAL CTA */}
+        {/* ── FINAL CTA ── */}
         <section className="py-20 bg-gray-50 dark:bg-gray-950/60">
           <div className="max-w-7xl mx-auto px-6 sm:px-8">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl">
